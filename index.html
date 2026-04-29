@@ -1281,7 +1281,6 @@
   <script>
     const SHEET_ID = '1-yF9f9LepfGBpg1fyhewTcgT7oePscPEScD9v-8Ggn4';
     const API_URL = 'https://script.google.com/macros/s/AKfycbywxZZYRDOgeD_fKqv2a1hUGjO97Cgmhbic9jpOPKtSCOA1In_MGiz81ZFI7BcCp1ImPg/exec';
-    const ADMIN_PASS = 'admin123';
     const POLL_MS = 15000;
 
     const CATEGORIES = ['Spotify', 'Claude', 'ChatGPT', 'Grok'];
@@ -1397,7 +1396,7 @@ async function tryLogin() {
   }
 }
 
-function enterAsWorker() {
+async function enterAsWorker() {
   const name = document.getElementById('worker-name').value.trim();
   const pass = document.getElementById('worker-pass').value.trim();
 
@@ -1406,18 +1405,18 @@ function enterAsWorker() {
     return;
   }
 
-  if (pass !== WORKER_PASS) {
-    toast('Невірний пароль працівника', 'err');
-    return;
+  const res = await authRequest(name, pass);
+
+  if (res.status === 'ok') {
+    localStorage.setItem('managerRole', 'worker');
+    localStorage.setItem('workerName', name);
+
+    isAdmin = false;
+    currentUser = name;
+    startApp();
+  } else {
+    toast('Невірний нік або пароль працівника', 'err');
   }
-
-  localStorage.setItem('managerRole', 'worker');
-  localStorage.setItem('workerName', name);
-
-  isAdmin = false;
-  currentUser = name;
-
-  startApp();
 }
 
     function logout() {
@@ -1429,19 +1428,24 @@ function enterAsWorker() {
 }
 
     function startApp() {
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-      currentUser = localStorage.getItem("workerName") || "";
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
 
-      badge.innerHTML = isAdmin
-        ? `🔐 АДМІН · ${currentUser}`
-        : `👁 ${currentUser}`;
-  
-      document.getElementById('btn-add').style.display = isAdmin ? 'flex' : 'none';
+  currentUser = localStorage.getItem("workerName") || "";
 
-      loadData();
-      pollTimer = setInterval(loadData, POLL_MS);
-    }
+  const badge = document.getElementById('role-badge');
+  badge.className = 'role-badge ' + (isAdmin ? 'admin' : 'worker');
+  badge.innerHTML = isAdmin
+    ? `🔐 АДМІН · ${currentUser || 'Admin'}`
+    : `👁 ${currentUser || 'Працівник'}`;
+
+  document.getElementById('btn-add').style.display = isAdmin ? 'flex' : 'none';
+
+  loadData();
+
+  clearInterval(pollTimer);
+  pollTimer = setInterval(loadData, POLL_MS);
+}
 
     function parseCSV(text) {
       const clean = text.trim();
@@ -1673,11 +1677,11 @@ function render() {
       const xb = (a.type || '').toLowerCase() === 'xbox';
 
       const adminBtns = isAdmin ? `
-        <div class="card-actions">
-          <button class="btn-icon btn-edit" onclick="openEditAcc(${a._id})">${svgEdit}</button>
-          <button class="btn-icon btn-del" onclick="alert('Видалення акаунтів поки через таблицю')">${svgTrash}</button>
-        </div>
-      ` : '';
+  <div class="card-actions">
+    <button class="btn-icon btn-edit" onclick="openEditAcc(${a._id})">${svgEdit}</button>
+    <button class="btn-icon btn-del" onclick="alert('Видалення акаунтів поки через таблицю')">${svgTrash}</button>
+  </div>
+` : '';
 
       const fields = [
         a.login ? `<div class="field-row"><span class="field-key">LOGIN</span><span class="field-val">${esc(a.login)}</span>${copyBtn(a.login)}</div>` : '',
@@ -1811,9 +1815,11 @@ if (!ok) return;
 
     function cdkCard(c) {
       const adminBtns = isAdmin ? `
-        <button class="btn-icon btn-edit" onclick="openEditCdk(${c._id})">${svgEdit}</button>
-        <button class="btn-icon btn-del" onclick="deleteCdk(${c._id})">${svgTrash}</button>
-      ` : '';
+  <button class="btn-icon btn-edit" onclick="openEditCdk(${c._id})">${svgEdit}</button>
+  <button class="btn-icon btn-del" onclick="deleteCdk(${c._id})">${svgTrash}</button>
+` : `
+  <button class="btn-icon btn-edit" onclick="openEditCdk(${c._id})">${svgEdit}</button>
+`;
       
       const usedBy = c._used && c.used_by
       ? `<div class="field-note" style="margin-top:10px;color:#facc15">👤 Використав: ${esc(c.used_by)}</div>`
