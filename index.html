@@ -1342,12 +1342,19 @@ function render() {
     }
 
     
+  function renderActions() {
   const el = document.getElementById('actions-bar');
 
   if (!el || !isAdmin || currentTab !== 'cdks') {
     if (el) el.innerHTML = '';
     return;
   }
+
+  el.innerHTML = `
+    <button class="btn-secondary" onclick="deleteSelectedCdks()">🗑 Видалити вибрані</button>
+    <button class="btn-danger" onclick="deleteFilteredCdks()">🗑 Видалити цей список</button>
+  `;
+}
 
   el.innerHTML = `
     <button class="btn-secondary" onclick="deleteSelectedCdks()">
