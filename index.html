@@ -1542,6 +1542,16 @@
   gap: 34px;
   text-align: center !important;
 }   
+ body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(600px at 10% 20%, #7c3aed22, transparent),
+    radial-gradient(500px at 90% 30%, #06b6d422, transparent),
+    radial-gradient(700px at 50% 100%, #9333ea22, transparent);
+  z-index: -1;
+}   
   </style>
 </head>
 <body>   
