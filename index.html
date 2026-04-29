@@ -1159,14 +1159,22 @@
     }
 
     function renderChips() {
-      const c = document.getElementById('chips');
+  const c = document.getElementById('chips');
 
-      if (currentTab === 'accounts') {
-        c.innerHTML = ['all', 'xbox', 'itunes'].map(v => `
-          <button class="chip${filterType === v ? ' active' : ''}" onclick="filterType='${v}';render()">
-            ${v === 'all' ? 'Всі' : v === 'xbox' ? 'Xbox' : 'iTunes'}
-          </button>
-        `).join('');
+  if (currentTab === 'accounts') {
+    c.innerHTML = ['all', 'xbox', 'itunes'].map(v => `
+      <button class="chip${filterType === v ? ' active' : ''}" onclick="filterType='${v}';render()">
+        ${v === 'all' ? 'Всі' : v === 'xbox' ? 'Xbox' : 'iTunes'}
+      </button>
+    `).join('');
+  } else {
+    c.innerHTML = ['all', 'active', 'used'].map(v => `
+      <button class="chip${filterUsed === v ? ' active' : ''}" onclick="filterUsed='${v}';render()">
+        ${v === 'all' ? 'Всі' : v === 'active' ? '✓ Активні' : '✗ Використані'}
+      </button>
+    `).join('');
+  }
+}
       } else {
         const usedChips = ['all', 'active', 'used'].map(v => `
           <button class="chip${filterUsed === v ? ' active' : ''}" onclick="filterUsed='${v}';render()">
