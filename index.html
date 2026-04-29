@@ -1150,6 +1150,75 @@
   font-weight: 800;
   font-size: 15px;
 }  
+  .account-quick-grid,
+.account-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.account-quick-card,
+.account-choice-card {
+  background: linear-gradient(145deg, #101827, #080d19);
+  border: 1px solid #ffffff1a;
+  border-radius: 22px;
+  padding: 20px;
+  cursor: pointer;
+  transition: .2s;
+  box-shadow: inset 0 0 24px #ffffff06;
+}
+
+.account-quick-card:hover,
+.account-choice-card:hover {
+  transform: translateY(-2px);
+  border-color: #8b5cf680;
+  box-shadow: 0 0 30px #8b5cf644;
+}
+
+.account-quick-head,
+.account-choice-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.account-quick-title,
+.account-choice-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.account-quick-sub,
+.account-choice-sub {
+  color: #94a3b8;
+  font-size: 13px;
+  margin-top: 3px;
+}
+
+.account-quick-stats {
+  display: flex;
+  gap: 28px;
+}
+
+.account-quick-label {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.account-quick-num {
+  font-size: 24px;
+  font-weight: 800;
+}
+
+@media (max-width: 720px) {
+  .account-quick-grid,
+  .account-choice-grid {
+    grid-template-columns: 1fr;
+  }
+}  
   </style>
 </head>
 <body>   
@@ -1281,7 +1350,7 @@
 
   <script>
     const SHEET_ID = '1-yF9f9LepfGBpg1fyhewTcgT7oePscPEScD9v-8Ggn4';
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwogekvSX_EswccxXWDyqFn3n7Q3buVMPLenvTeYOmwj3j5FiBK2iZ_C__62y370fy_QQ/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyJyp24KODOtYwur7ZUruhV1HjTwioXV-cKY4zCzQSTsPV1BHDpZkS5lsr1lCMrUsGT/exec';
     const POLL_MS = 15000;
 
     const CATEGORIES = ['Spotify', 'Claude', 'ChatGPT', 'Grok'];
@@ -1580,37 +1649,94 @@ function normalizeDate(value) {
     }
 
     function renderCategoryStats() {
-      const wrap = document.getElementById('cat-stats');
+  const wrap = document.getElementById('cat-stats');
 
-      wrap.innerHTML = CATEGORIES.map(cat => {
-        const active = cdks.filter(c => !c._used && c.category === cat).length;
-        const usedTotal = getUsedTotal(cat);
-        const usedToday = getUsedToday(cat);
+  if (currentTab === 'accounts') {
+    wrap.style.display = 'grid';
 
-        return `
-          <div class="cat-card ${filterCategory === cat ? 'active' : ''}" onclick="setCategory('${cat}')">
-            <div class="cat-name">${catIcon(cat)} ${cat}</div>
+    const appCount = accounts.filter(a => String(a.type || '').toLowerCase() === 'itunes').length;
+    const xboxCount = accounts.filter(a => String(a.type || '').toLowerCase() === 'xbox').length;
 
-              <div class="cat-row">
-              <div>
-                <div>Активні</div>
-                <div class="cat-num" style="color:#4ade80">${active}</div>
-              </div>
+    const appBalance = getAccountBalance('itunes');
+    const xboxBalance = getAccountBalance('xbox');
 
-              <div>
-                <div>Сьогодні</div>
-                <div class="cat-num" style="color:#facc15">${usedToday}</div>
-              </div>
-
-              <div>
-                <div>Всього</div>
-                <div class="cat-num" style="color:#f87171">${usedTotal}</div>
-              </div>
-            </div>
+    wrap.innerHTML = `
+      <div class="account-quick-card ${filterType === 'itunes' ? 'active' : ''}" onclick="filterType='itunes';render();renderCategoryStats()">
+        <div class="account-quick-head">
+          ${accIcon('itunes')}
+          <div>
+            <div class="account-quick-title">App Store</div>
+            <div class="account-quick-sub">App Store акаунти</div>
           </div>
-        `;
-      }).join('');
-    }
+        </div>
+
+        <div class="account-quick-stats">
+          <div>
+            <div class="account-quick-label">Акаунти</div>
+            <div class="account-quick-num" style="color:#60a5fa">${appCount}</div>
+          </div>
+          <div>
+            <div class="account-quick-label">Баланс</div>
+            <div class="account-quick-num" style="color:#facc15">${appBalance}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="account-quick-card ${filterType === 'xbox' ? 'active' : ''}" onclick="filterType='xbox';render();renderCategoryStats()">
+        <div class="account-quick-head">
+          ${accIcon('xbox')}
+          <div>
+            <div class="account-quick-title">Xbox</div>
+            <div class="account-quick-sub">Xbox акаунти</div>
+          </div>
+        </div>
+
+        <div class="account-quick-stats">
+          <div>
+            <div class="account-quick-label">Акаунти</div>
+            <div class="account-quick-num" style="color:#4ade80">${xboxCount}</div>
+          </div>
+          <div>
+            <div class="account-quick-label">Баланс</div>
+            <div class="account-quick-num" style="color:#facc15">${xboxBalance}</div>
+          </div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  wrap.style.display = 'grid';
+
+  wrap.innerHTML = CATEGORIES.map(cat => {
+    const active = cdks.filter(c => !c._used && c.category === cat).length;
+    const usedTotal = getUsedTotal(cat);
+    const usedToday = getUsedToday(cat);
+
+    return `
+      <div class="cat-card ${filterCategory === cat ? 'active' : ''}" onclick="setCategory('${cat}')">
+        <div class="cat-name">${catIcon(cat)} ${cat}</div>
+
+        <div class="cat-row">
+          <div>
+            <div>Активні</div>
+            <div class="cat-num" style="color:#4ade80">${active}</div>
+          </div>
+
+          <div>
+            <div>Сьогодні</div>
+            <div class="cat-num" style="color:#facc15">${usedToday}</div>
+          </div>
+
+          <div>
+            <div>Всього</div>
+            <div class="cat-num" style="color:#f87171">${usedTotal}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
 
     function setCategory(cat) {
       filterCategory = filterCategory === cat ? 'all' : cat;
@@ -1647,7 +1773,7 @@ function normalizeDate(value) {
   if (currentTab === 'accounts') {
     c.innerHTML = ['all', 'xbox', 'itunes'].map(v => `
       <button class="chip${filterType === v ? ' active' : ''}" onclick="filterType='${v}';render()">
-        ${v === 'all' ? 'Всі' : v === 'xbox' ? 'Xbox' : 'iTunes'}
+        ${v === 'all' ? 'Всі' : v === 'xbox' ? 'Xbox' : 'App Store'}
       </button>
     `).join('');
   } else {
@@ -1983,16 +2109,67 @@ if (!ok) return;
     }
 
     function openAddModal() {
-      editId = null;
+  editId = null;
 
-      document.getElementById('modal-title').textContent =
-        currentTab === 'accounts' ? 'Новий акаунт' : 'Новий CDK';
+  if (currentTab === 'accounts') {
+    document.getElementById('modal-title').textContent = 'Новий акаунт';
+    document.getElementById('modal-body').innerHTML = accountTypeChoice();
+    document.getElementById('modal').style.display = 'flex';
+    return;
+  }
 
-      document.getElementById('modal-body').innerHTML =
-        currentTab === 'accounts' ? accForm(null) : cdkForm(null);
+  document.getElementById('modal-title').textContent = 'Новий CDK';
+  document.getElementById('modal-body').innerHTML = cdkForm(null);
+  document.getElementById('modal').style.display = 'flex';
+}
 
-      document.getElementById('modal').style.display = 'flex';
-    }
+    function accountTypeChoice() {
+  return `
+    <div class="account-choice-grid">
+      <div class="account-choice-card" onclick="openAccountForm('itunes')">
+        <div class="account-choice-head">
+          ${accIcon('itunes')}
+          <div>
+            <div class="account-choice-title">App Store Account</div>
+            <div class="account-choice-sub">Додати новий App Store акаунт</div>
+          </div>
+        </div>
+        <div style="color:#94a3b8;font-size:13px">
+          Email · Пароль · Посилання · Баланс · Курс · Нотатка
+        </div>
+      </div>
+
+      <div class="account-choice-card" onclick="openAccountForm('xbox')">
+        <div class="account-choice-head">
+          ${accIcon('xbox')}
+          <div>
+            <div class="account-choice-title">Xbox Account</div>
+            <div class="account-choice-sub">Додати новий Xbox акаунт</div>
+          </div>
+        </div>
+        <div style="color:#94a3b8;font-size:13px">
+          Email · Пароль · 2FA · Баланс · Курс · Нотатка
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function openAccountForm(type) {
+  editId = null;
+  document.getElementById('modal-title').textContent =
+    type === 'xbox' ? 'Новий Xbox акаунт' : 'Новий App Store акаунт';
+  document.getElementById('modal-body').innerHTML = accForm(null, type);
+}
+
+function getAccountBalance(type) {
+  return accounts
+    .filter(a => String(a.type || '').toLowerCase() === type)
+    .reduce((sum, a) => {
+      const n = String(a.balance || '').replace(',', '.').replace(/[^\d.]/g, '');
+      return sum + Number(n || 0);
+    }, 0);
+}
 
     function openEditAcc(id) {
       editId = id;
@@ -2012,67 +2189,70 @@ if (!ok) return;
       document.getElementById('modal').style.display = 'none';
     }
 
-    function accForm(a) {
-      const t = a ? (a.type || 'xbox').toLowerCase() : 'xbox';
+    function accForm(a, forcedType = null) {
+  const t = forcedType || (a ? (a.type || 'xbox').toLowerCase() : 'xbox');
+  const isXbox = t === 'xbox';
 
-      return `
-        <div>
-          <div class="form-field">
-            <label class="form-label">Тип</label>
+  return `
+    <div>
+      <div class="form-field">
+        <label class="form-label">Тип</label>
 
-            <div class="type-btns">
-              <button class="type-btn${t === 'xbox' ? ' sel' : ''}" id="tb-xbox" onclick="selType('xbox')">🎮 Xbox</button>
-              <button class="type-btn${t === 'itunes' ? ' sel' : ''}" id="tb-itunes" onclick="selType('itunes')">🍎 iTunes</button>
-            </div>
-
-            <input type="hidden" id="f-type" value="${t}">
-          </div>
-
-          <div class="form-field">
-            <label class="form-label">Логін / Email</label>
-            <input class="form-input" id="f-login" value="${esc(a?.login || '')}">
-          </div>
-
-          <div class="form-field">
-            <label class="form-label">Пароль</label>
-
-            <div class="pass-field">
-              <input class="form-input" type="password" id="f-pass" value="${esc(a?.password || '')}">
-              <button class="pass-toggle" onclick="togglePw('f-pass',this)">👁</button>
-            </div>
-          </div>
-
-          <div class="form-field">
-            <label class="form-label">Посилання</label>
-            <input class="form-input" id="f-link" value="${esc(a?.link || '')}">
-          </div>
-
-          <div class="form-field">
-            <label class="form-label">Телефон / 2FA</label>
-            <input class="form-input" id="f-phone" value="${esc(a?.phone_code || '')}">
-          </div>
-
-          <div class="form-field">
-            <label class="form-label">Ціна</label>
-            <input class="form-input" id="f-rate" value="${esc(a?.rate || '')}">
-          </div>
-
-          <div class="form-field">
-            <label class="form-label">Нотатка</label>
-            <textarea class="form-input" id="f-note">${esc(a?.note || '')}</textarea>
-          </div>
-
-          <div class="form-field" style="background:#f59e0b10;border:1px solid #f59e0b30;border-radius:10px;padding:12px;font-size:12px;color:#fbbf24">
-            💡 Акаунти поки додаються через копіювання рядка в Google Таблицю.
-          </div>
-
-          <div class="form-footer">
-            <button class="btn-cancel" onclick="closeModal()">Скасувати</button>
-            <button class="btn-primary" style="width:auto" onclick="saveAccForm()">Зберегти</button>
-          </div>
+        <div class="type-btns">
+          <button class="type-btn${t === 'itunes' ? ' sel' : ''}" id="tb-itunes" onclick="openAccountForm('itunes')">${accIcon('itunes')} App Store</button>
+          <button class="type-btn${t === 'xbox' ? ' sel' : ''}" id="tb-xbox" onclick="openAccountForm('xbox')">${accIcon('xbox')} Xbox</button>
         </div>
-      `;
-    }
+
+        <input type="hidden" id="f-type" value="${t}">
+      </div>
+
+      <div class="form-field">
+        <label class="form-label">${isXbox ? 'Логін / Email' : 'Email'}</label>
+        <input class="form-input" id="f-login" value="${esc(a?.login || '')}" placeholder="${isXbox ? 'example@outlook.com' : 'example@gmail.com'}">
+      </div>
+
+      <div class="form-field">
+        <label class="form-label">Пароль</label>
+        <div class="pass-field">
+          <input class="form-input" type="password" id="f-pass" value="${esc(a?.password || '')}" placeholder="Введіть пароль">
+          <button class="pass-toggle" onclick="togglePw('f-pass',this)">👁</button>
+        </div>
+      </div>
+
+      ${isXbox ? `
+        <div class="form-field">
+          <label class="form-label">2FA Email</label>
+          <input class="form-input" id="f-twofa" value="${esc(a?.twofa || '')}" placeholder="Пошта для 2FA">
+        </div>
+      ` : `
+        <div class="form-field">
+          <label class="form-label">Посилання <span style="color:#94a3b8">(необовʼязково)</span></label>
+          <input class="form-input" id="f-link" value="${esc(a?.link || '')}" placeholder="https://...">
+        </div>
+      `}
+
+      <div class="form-field">
+        <label class="form-label">Баланс</label>
+        <input class="form-input" id="f-balance" value="${esc(a?.balance || '')}" placeholder="Наприклад: 5.00 USD">
+      </div>
+
+      <div class="form-field">
+        <label class="form-label">Курс</label>
+        <input class="form-input" id="f-rate" value="${esc(a?.rate || '')}" placeholder="Наприклад: 40.50">
+      </div>
+
+      <div class="form-field">
+        <label class="form-label">Нотатка</label>
+        <textarea class="form-input" id="f-note" placeholder="Додайте нотатку">${esc(a?.note || '')}</textarea>
+      </div>
+
+      <div class="form-footer">
+        <button class="btn-cancel" onclick="closeModal()">Скасувати</button>
+        <button class="btn-primary" style="width:auto" onclick="saveAccForm()">Зберегти</button>
+      </div>
+    </div>
+  `;
+}
 
 function cdkForm(c) {
   const used = c ? c._used : false;
@@ -2153,23 +2333,26 @@ function cdkForm(c) {
     }
 
     function saveAccForm() {
-      const data = {
-        type: document.getElementById('f-type').value,
-        login: document.getElementById('f-login').value,
-        password: document.getElementById('f-pass').value,
-        link: document.getElementById('f-link').value,
-        phone_code: document.getElementById('f-phone').value,
-        rate: document.getElementById('f-rate').value,
-        note: document.getElementById('f-note').value
-      };
+  const type = document.getElementById('f-type').value;
 
-      prompt(
-        'Скопіюй рядок для таблиці Accounts (Ctrl+C):',
-        `${data.type}\t${data.login}\t${data.password}\t${data.link}\t${data.phone_code}\t${data.rate}\t${data.note}`
-      );
+  const data = {
+    type,
+    login: document.getElementById('f-login').value,
+    password: document.getElementById('f-pass').value,
+    link: type === 'itunes' ? document.getElementById('f-link').value : '',
+    balance: document.getElementById('f-balance').value,
+    rate: document.getElementById('f-rate').value,
+    note: document.getElementById('f-note').value,
+    twofa: type === 'xbox' ? document.getElementById('f-twofa').value : ''
+  };
 
-      closeModal();
-    }
+  prompt(
+    'Скопіюй рядок для таблиці Accounts:',
+    `${data.type}\t${data.login}\t${data.password}\t${data.link}\t${data.balance}\t${data.rate}\t${data.note}\t${data.twofa}`
+  );
+
+  closeModal();
+}
 
     async function saveCdkForm() {
   const isEdit = editId !== null;
