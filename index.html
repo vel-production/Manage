@@ -1450,8 +1450,9 @@
   height: 58px;
 } 
  .user-badge {
-  font-weight: 600;
-  letter-spacing: 0.3px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppearcase; 
 }   
   </style>
 </head>
@@ -1740,7 +1741,7 @@ async function enterAsWorker() {
   const badge = document.getElementById('role-badge');
   badge.className = 'role-badge ' + (isAdmin ? 'admin' : 'worker');
   badge.innerHTML = isAdmin
-    ? `Власник · ${currentUser || 'Admin'}`
+    ? `Власник`
     : `👁 ${currentUser || 'Працівник'}`;
 
   document.getElementById('btn-add').style.display = isAdmin ? 'flex' : 'none';
