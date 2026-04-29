@@ -633,11 +633,14 @@ function saveAccForm() {
 }
 
 async function saveCdkForm() {
+  const isEdit = editId !== null;
+
   const data = {
-    action: "add",
+    action: isEdit ? "toggle" : "add",
+    row: editId,
     label: document.getElementById('f-label').value,
     code: document.getElementById('f-code').value,
-    used: document.getElementById('f-status').value,
+    used: document.getElementById('f-status').value === 'true' ? "TRUE" : "FALSE",
     note: document.getElementById('f-note').value,
   };
 
