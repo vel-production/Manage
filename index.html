@@ -1398,7 +1398,7 @@ async function deleteFilteredCdks() {
       }
     }
 
-    function renderActions() {
+    
   const el = document.getElementById('actions-bar');
 
   if (!el || !isAdmin || currentTab !== 'cdks') {
@@ -1492,8 +1492,10 @@ async function deleteFilteredCdks() {
         <div class="cdk-card ${c._used ? 'used' : 'active'}">
           <div class="cdk-head">
             <div class="cdk-title">
-              🔑 ${esc(c.label || 'CDK Код')}
-              <span class="category-badge">${catIcon(c.category)} ${esc(c.category || 'Spotify')}</span>
+              ${isAdmin ? `<input type="checkbox" class="cdk-select" ${selected.has(c._id) ? 'checked' : ''} onclick="event.stopPropagation();toggleSelect(${c._id})">` : ''}
+              ${catIcon(c.category)}
+              ${esc(c.category || 'CDK')}
+      
             </div>
 
             <div class="cdk-controls">
