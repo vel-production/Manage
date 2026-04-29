@@ -1356,17 +1356,6 @@ function render() {
   `;
 }
 
-  el.innerHTML = `
-    <button class="btn-secondary" onclick="deleteSelectedCdks()">
-      🗑 Видалити вибрані
-    </button>
-
-    <button class="btn-danger" onclick="deleteFilteredCdks()">
-      🗑 Видалити цей список
-    </button>
-  `;
-}
-
 function toggleSelect(id) {
   if (selected.has(id)) selected.delete(id);
   else selected.add(id);
