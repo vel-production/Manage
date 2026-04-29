@@ -1277,6 +1277,7 @@
     let pollTimer = null;
     let selected = new Set();
     let confirmResolve = null;
+    let currentUser = "";
 
 function showConfirm(title, text, type = 'danger') {
   return new Promise(resolve => {
@@ -1333,30 +1334,64 @@ function confirmNo() {
   }, 2500);
 }
 
-    function tryLogin() {
-  const pw = document.getElementById('pw-input').value;
-  const err = document.getElementById('pw-err');
+    function authRequest(login, password) {
+  return new Promise(resolve => {
+    const cb = "auth_cb_" + Date.now();
 
-  if (pw === ADMIN_PASS) {
-    localStorage.setItem('managerRole', 'admin');
+    window[cb] = data => {
+      delete window[cb];
+      script.remove();
+      resolve(data);
+    };
+
+    const script = document.createElement("script");
+    script.src =
+      API_URL +
+      "?callback=" + cb +
+      "&login=" + encodeURIComponent(login) +
+      "&password=" + encodeURIComponent(password);
+
+    document.body.appendChild(script);
+  });
+}
+
+async function tryLogin() {
+  const pw = document.getElementById("pw-input").value;
+  const res = await authRequest("admin", pw);
+
+  if (res.status === "ok") {
+    localStorage.setItem("managerRole", "admin");
+    localStorage.setItem("workerName", "Admin");
+
+    currentUser = "Admin";
     isAdmin = true;
     startApp();
   } else {
-    err.style.display = 'block';
-    document.getElementById('pw-input').classList.add('err');
-
-    setTimeout(() => {
-      err.style.display = 'none';
-      document.getElementById('pw-input').classList.remove('err');
-    }, 1500);
+    document.getElementById("pw-err").style.display = "block";
+    toast("Невірний пароль адміна", "err");
   }
 }
 
-    function enterAsWorker() {
-      localStorage.setItem('managerRole', 'worker');
-      isAdmin = false;
-      startApp();
-    }
+async function enterAsWorker() {
+  const name = prompt("Введи свій нік:");
+  if (!name) return;
+
+  const pass = prompt("Введи пароль працівника:");
+  if (!pass) return;
+
+  const res = await authRequest(name, pass);
+
+  if (res.status === "ok") {
+    localStorage.setItem("managerRole", "worker");
+    localStorage.setItem("workerName", name);
+
+    currentUser = name;
+    isAdmin = false;
+    startApp();
+  } else {
+    toast("Невірний пароль працівника", "err");
+  }
+}
 
     function logout() {
   localStorage.removeItem('managerRole');
@@ -1369,11 +1404,12 @@ function confirmNo() {
     function startApp() {
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('app').style.display = 'block';
+      currentUser = localStorage.getItem("workerName") || "";
 
-      const badge = document.getElementById('role-badge');
-      badge.className = 'role-badge ' + (isAdmin ? 'admin' : 'worker');
-      badge.innerHTML = isAdmin ? '🔐 АДМІН' : '👁 ПЕРЕГЛЯД';
-
+      badge.innerHTML = isAdmin
+        ? `🔐 АДМІН · ${currentUser}`
+        : `👁 ${currentUser}`;
+  
       document.getElementById('btn-add').style.display = isAdmin ? 'flex' : 'none';
 
       loadData();
@@ -1444,10 +1480,11 @@ function confirmNo() {
         cdks = parseCSV(await rC.text()).map((c, i) => ({
   ...c,
   _id: i,
-  _used: (c.used || '').toLowerCase() === 'true' || c.used === '1',
-  category: c.category || 'Spotify',
-  note: String(c.note || '').toLowerCase() === 'false' ? '' : (c.note || ''),
-  used_at: c.used_at || ''
+  _used: (c.used || "").toLowerCase() === "true" || c.used === "1",
+  category: c.category || "Spotify",
+  note: String(c.note || "").toLowerCase() === "false" ? "" : (c.note || ""),
+  used_at: c.used_at || "",
+  used_by: c.used_by || ""
 }));
 
         statsRows = parseCSV(await rS.text());
@@ -1750,6 +1787,10 @@ if (!ok) return;
         <button class="btn-icon btn-edit" onclick="openEditCdk(${c._id})">${svgEdit}</button>
         <button class="btn-icon btn-del" onclick="deleteCdk(${c._id})">${svgTrash}</button>
       ` : '';
+      
+      const usedBy = c._used && c.used_by
+      ? `<div class="field-note" style="margin-top:10px;color:#facc15">👤 Використав: ${esc(c.used_by)}</div>`
+      : "";
 
       const workerToggle = `
         <button class="btn-toggle ${c._used ? 'used' : 'active'}" onclick="workerToggleCdk(${c._id})">
@@ -1787,8 +1828,10 @@ if (!ok) return;
             ${codeDisplay}
           </div>
 
+          ${usedBy}
+
           ${c.note && String(c.note).toLowerCase() !== 'false'
-        ? `<div class="field-note" style="margin-top:10px">${esc(c.note)}</div>`
+          ? `<div class="field-note" style="margin-top:10px">${esc(c.note)}</div>`
           : ''}
         </div>
       `;
@@ -1804,29 +1847,31 @@ if (!ok) return;
     }
 
     async function postApi(payload) {
-      await fetch(API_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: JSON.stringify(payload)
-      });
-    }
+  await fetch(API_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: JSON.stringify({
+      ...payload,
+      user: currentUser || localStorage.getItem("workerName") || "Unknown"
+    })
+  });
+}
 
     async function workerToggleCdk(id) {
-      const c = cdks[id];
-      if (!c) return;
+  const c = cdks[id];
+  if (!c) return;
 
-      const newStatus = !c._used;
+  const newStatus = !c._used;
 
-      await postApi({
-        type: 'cdk',
-        action: 'toggle',
-        row: id,
-        used: newStatus ? 'TRUE' : 'FALSE',
-        used_at: newStatus ? new Date().toISOString() : ''
-      });
+  await postApi({
+    type: "cdk",
+    action: "toggle",
+    row: id,
+    used: newStatus ? "TRUE" : "FALSE"
+  });
 
-      setTimeout(loadData, 1000);
-    }
+  setTimeout(loadData, 1000);
+}
 
     async function deleteCdk(id) {
   const ok = await showConfirm(
