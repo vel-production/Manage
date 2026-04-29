@@ -667,21 +667,23 @@
       color: #4b5563;
     }
 
-    .btn-copy,
-    .btn-reveal {
-      background: #ffffff10;
-      border: 1px solid var(--border2);
-      border-radius: 6px;
-      padding: 4px 8px;
-      color: #888;
-      font-size: 11px;
-    }
+    
 
-    .btn-copy.ok {
-      background: #22c55e18;
-      border-color: #22c55e55;
-      color: #4ade80;
-    }
+   .btn-copy {
+  background: #ffffff10;
+  border: 1px solid #ffffff22;
+  border-radius: 10px;
+  padding: 9px 13px;
+  color: #e5e7eb;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.btn-copy.ok {
+  background: #22c55e18;
+  border-color: #22c55e55;
+  color: #4ade80;
+}
 
     .modal-overlay {
       position: fixed;
@@ -877,10 +879,71 @@
 }
 
 .cdk-select {
-  width: 18px;
-  height: 18px;
-  accent-color: #8b5cf6;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border: 2px solid #8b5cf6;
+  border-radius: 6px;
+  background: #111827;
+  box-shadow: 0 0 12px #8b5cf655;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
 }
+
+.cdk-select:checked {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border-color: #a78bfa;
+}
+
+.cdk-select:checked::after {
+  content: "✓";
+  color: white;
+  font-weight: 800;
+  font-size: 15px;
+}
+   .chip {
+  padding: 10px 18px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.chip-all.active {
+  border-color: #8b5cf6;
+  background: #8b5cf622;
+  color: #c4b5fd;
+}
+
+.chip-active {
+  border-color: #22c55e44;
+  color: #4ade80;
+}
+
+.chip-active.active {
+  background: #22c55e18;
+}
+
+.chip-used {
+  border-color: #ef444444;
+  color: #f87171;
+}
+
+.chip-used.active {
+  background: #ef444418;
+}
+
+.chip-today {
+  border-color: #f59e0b66;
+  color: #facc15;
+  background: #f59e0b12;
+}
+
+.tab-btn.active,
+.btn-add,
+.btn-primary {
+  background: linear-gradient(135deg, #5b5ff5, #7c3aed);
+} 
   </style>
 </head>
 
@@ -1240,11 +1303,12 @@
       </button>
     `).join('');
   } else {
-    c.innerHTML = ['all', 'active', 'used'].map(v => `
-      <button class="chip${filterUsed === v ? ' active' : ''}" onclick="filterUsed='${v}';render()">
-        ${v === 'all' ? 'Всі' : v === 'active' ? '✓ Активні' : '✗ Використані'}
-      </button>
-    `).join('');
+    c.innerHTML = `
+      <button class="chip chip-all${filterUsed === 'all' ? ' active' : ''}" onclick="filterUsed='all';render()">Всі</button>
+      <button class="chip chip-active${filterUsed === 'active' ? ' active' : ''}" onclick="filterUsed='active';render()">✓ Активні</button>
+      <button class="chip chip-used${filterUsed === 'used' ? ' active' : ''}" onclick="filterUsed='used';render()">✕ Використані</button>
+      <button class="chip chip-today" onclick="alert('Фільтр за сьогодні додамо наступним кроком')">▣ Використані сьогодні</button>
+    `;
   }
 }
 
@@ -1507,14 +1571,14 @@ async function deleteFilteredCdks() {
         clearTimeout(copyTimers[text]);
 
         copyTimers[text] = setTimeout(() => {
-          btnEl.innerHTML = '📋 Копія';
+          btnEl.innerHTML = '▣ Копіювати';
           btnEl.classList.remove('ok');
         }, 1400);
       });
     }
 
     function copyBtn(text) {
-      return `<button class="btn-copy" onclick="copyText('${esc(text)}',this)">📋 Копія</button>`;
+      return `<button class="btn-copy" onclick="copyText('${esc(text)}',this)">▣ Копіювати</button>`;
     }
 
     function openAddModal() {
