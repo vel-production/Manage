@@ -1722,6 +1722,55 @@
 .toolbar { animation-delay: .38s; }
 .chips { animation-delay: .42s; }
 .actions-bar { animation-delay: .46s; }   
+  .modal-box {
+  max-width: 620px;
+  overflow-x: hidden;
+}
+
+.type-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.type-btn {
+  height: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.type-btn .account-big-icon,
+.type-btn .account-stat-icon,
+.type-btn .account-icon {
+  width: 72px !important;
+  height: 72px !important;
+  margin-bottom: 10px;
+}  
+  .modal-box {
+  overflow-x: hidden !important;
+  scrollbar-width: thin;
+  scrollbar-color: #8b5cf6 #111827;
+}
+
+.modal-box::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-box::-webkit-scrollbar-track {
+  background: #111827;
+  border-radius: 20px;
+}
+
+.modal-box::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #6366f1, #8b5cf6);
+  border-radius: 20px;
+}
+
+.modal-box::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #8b5cf6, #a855f7);
+}  
   </style>
 </head>
 <body>   
