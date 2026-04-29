@@ -209,10 +209,37 @@
 }
 
     .role-badge.worker {
-      background: #ffffff08;
-      border-color: var(--border2);
-      color: var(--muted);
-    }
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #064e3b, #0f766e, #0891b2);
+  border-color: #22d3ee80;
+  color: #ecfeff;
+  box-shadow:
+    0 0 18px #22d3ee55,
+    inset 0 0 18px #ffffff12;
+  animation: workerPulse 2.4s ease-in-out infinite;
+}
+
+.role-badge.worker::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -80%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, #ffffff45, transparent);
+  transform: skewX(-20deg);
+  animation: adminShine 3s infinite;
+}
+
+@keyframes workerPulse {
+  0%, 100% {
+    box-shadow: 0 0 14px #22d3ee55, inset 0 0 18px #ffffff12;
+  }
+  50% {
+    box-shadow: 0 0 28px #22d3eeaa, inset 0 0 22px #ffffff18;
+  }
+}
 
     .btn-ghost {
       background: #ffffff08;
@@ -2057,9 +2084,10 @@ async function enterAsWorker() {
 
   const badge = document.getElementById('role-badge');
   badge.className = 'role-badge ' + (isAdmin ? 'admin' : 'worker');
+
   badge.innerHTML = isAdmin
-    ? `ВЛАСНИК`
-    : `👁 ${currentUser || 'Працівник'}`;
+      ? `ВЛАСНИК`
+      : `${currentUser || 'Працівник'}`;
 
   document.getElementById('btn-add').style.display = isAdmin ? 'flex' : 'none';
 
@@ -2424,7 +2452,7 @@ function render() {
 
   const adminBtns = isAdmin ? `
     <button class="btn-icon btn-edit" onclick="openEditAcc(${a._id})">${svgEdit}</button>
-    <button class="btn-icon btn-del" onclick="alert('Видалення акаунтів поки через таблицю')">${svgTrash}</button>
+    <button class="btn-icon btn-del" onclick="deleteAccount(${a._id})">${svgTrash}</button>
   ` : '';
 
   return `
@@ -2670,6 +2698,24 @@ if (!ok) return;
 }
 
     let copyTimers = {};
+
+    async function deleteAccount(id) {
+  const ok = await showConfirm(
+    'Видалити акаунт?',
+    'Цей акаунт буде видалено з таблиці.'
+  );
+
+  if (!ok) return;
+
+  await postApi({
+    type: 'account',
+    action: 'delete',
+    row: id
+  });
+
+  toast('Акаунт видалено', 'ok');
+  setTimeout(loadData, 1000);
+}
 
     function copyText(text, btnEl) {
       navigator.clipboard.writeText(text).then(() => {
