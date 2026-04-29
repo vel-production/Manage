@@ -1666,7 +1666,7 @@ function normalizeDate(value) {
           ${accIcon('itunes')}
           <div>
             <div class="account-quick-title">App Store</div>
-            <div class="account-quick-sub">App Store акаунти</div>
+            <div class="account-quick-sub">App Store</div>
           </div>
         </div>
 
@@ -1687,7 +1687,7 @@ function normalizeDate(value) {
           ${accIcon('xbox')}
           <div>
             <div class="account-quick-title">Xbox</div>
-            <div class="account-quick-sub">Xbox акаунти</div>
+            <div class="account-quick-sub">Xbox</div>
           </div>
         </div>
 
@@ -2365,26 +2365,37 @@ function cdkForm(c) {
       btn.textContent = !now ? '✗ Використано' : '✓ Активний';
     }
 
-    function saveAccForm() {
-  const type = document.getElementById('f-type').value;
+    async function saveAccForm() {
+  const accType = document.getElementById('f-type').value;
+  const isEdit = editId !== null;
 
-  const data = {
-    type,
-    login: document.getElementById('f-login').value,
-    password: document.getElementById('f-pass').value,
-    link: type === 'itunes' ? document.getElementById('f-link').value : '',
-    balance: document.getElementById('f-balance').value,
-    rate: document.getElementById('f-rate').value,
-    note: document.getElementById('f-note').value,
-    twofa: type === 'xbox' ? document.getElementById('f-twofa').value : ''
-  };
+  await postApi({
+    type: 'account',
+    action: isEdit ? 'update' : 'add',
+    row: editId,
+    accType,
+    login: document.getElementById('f-login').value.trim(),
+    password: document.getElementById('f-pass').value.trim(),
+    link: accType === 'itunes' ? document.getElementById('f-link').value.trim() : '',
+    balance: document.getElementById('f-balance').value.trim(),
+    rate: document.getElementById('f-rate').value.trim(),
+    note: document.getElementById('f-note').value.trim(),
+    twofa: accType === 'xbox' ? document.getElementById('f-twofa').value.trim() : ''
+  });
 
-  prompt(
-    'Скопіюй рядок для таблиці Accounts:',
-    `${data.type}\t${data.login}\t${data.password}\t${data.link}\t${data.balance}\t${data.rate}\t${data.note}\t${data.twofa}`
-  );
-
+  toast(isEdit ? 'Акаунт оновлено' : 'Акаунт додано', 'ok');
   closeModal();
+  setTimeout(loadData, 1000);
+}
+    
+    function accIcon(type) {
+  const t = String(type || '').toLowerCase();
+
+  if (t === 'xbox') {
+    return `<img src="Xbox.png" class="account-stat-icon" alt="Xbox">`;
+  }
+
+  return `<img src="Appstore.png" class="account-stat-icon" alt="App Store">`;
 }
 
     async function saveCdkForm() {
