@@ -87,7 +87,7 @@
       width: 44px;
       height: 44px;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
-      border-radius: 14px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -494,6 +494,14 @@
       font-size: 12px;
       background: #6366f118;
       color: #a5b4fc;
+    }
+
+    .cat-img {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      object-fit: cover;
+      vertical-align: middle;
     }
 
     .type-xbox {
@@ -1589,7 +1597,7 @@ function render() {
   const file = files[cat];
   if (!file) return '🔑';
 
-  return `<img src="${file}" style="width:18px;height:18px;border-radius:50%;vertical-align:middle;margin-right:6px" onerror="this.style.display='none'">`;
+  return `<img class="cat-img" src="./${file}" alt="${cat}" onerror="this.replaceWith(document.createTextNode('🔑'))">`;
 }
 
     function esc(s) {
