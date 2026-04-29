@@ -1427,6 +1427,32 @@
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }   
+  .cat-card {
+  min-height: 145px;
+  padding: 22px;
+}
+
+.cat-name {
+  font-size: 17px;
+  margin-bottom: 18px;
+}
+
+.cat-num {
+  font-size: 26px;
+}
+
+.cat-row {
+  font-size: 13px;
+}
+
+.cat-icon {
+  width: 58px;
+  height: 58px;
+} 
+ .user-badge {
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}   
   </style>
 </head>
 <body>   
@@ -1714,7 +1740,7 @@ async function enterAsWorker() {
   const badge = document.getElementById('role-badge');
   badge.className = 'role-badge ' + (isAdmin ? 'admin' : 'worker');
   badge.innerHTML = isAdmin
-    ? `🔐 АДМІН · ${currentUser || 'Admin'}`
+    ? `Власник · ${currentUser || 'Admin'}`
     : `👁 ${currentUser || 'Працівник'}`;
 
   document.getElementById('btn-add').style.display = isAdmin ? 'flex' : 'none';
@@ -1802,8 +1828,7 @@ async function enterAsWorker() {
         render();
         renderCategoryStats();
 
-        document.getElementById('sync-info').textContent =
-          '↻ ' + new Date().toLocaleTimeString('uk-UA') + ' · авто-оновлення 15с';
+        document.getElementById('sync-info').textContent = '';
       } catch (e) {
         document.getElementById('sync-info').textContent =
           '⚠ Помилка завантаження — перевір налаштування таблиці';
@@ -1984,7 +2009,7 @@ return;
       <button class="chip chip-all${filterUsed === 'all' ? ' active' : ''}" onclick="filterUsed='all';render()">Всі</button>
       <button class="chip chip-active${filterUsed === 'active' ? ' active' : ''}" onclick="filterUsed='active';render()">✓ Активні</button>
       <button class="chip chip-used${filterUsed === 'used' ? ' active' : ''}" onclick="filterUsed='used';render()">✕ Використані</button>
-      <button class="chip chip-today${filterUsed === 'today' ? ' active' : ''}" onclick="filterUsed='today';render()">▣ Використані сьогодні</button>
+      <button class="chip chip-today${filterUsed === 'today' ? ' active' : ''}" onclick="filterUsed='today';render()">📅 За день</button>
     `;
   }
 }
