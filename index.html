@@ -1219,6 +1219,17 @@
     grid-template-columns: 1fr;
   }
 }  
+  .account-stat-icon,
+.account-icon {
+  width: 56px !important;
+  height: 56px !important;
+  min-width: 56px !important;
+  max-width: 56px !important;
+  max-height: 56px !important;
+  object-fit: contain !important;
+  border-radius: 16px;
+  display: block;
+}  
   </style>
 </head>
 <body>   
@@ -2126,6 +2137,13 @@ if (!ok) return;
   const t = String(type || '').toLowerCase();
 
   if (t === 'xbox') {
+    return `<img src="Xbox.png" class="account-stat-icon account-icon" alt="Xbox">`;
+  }
+
+  return `<img src="Appstore.png" class="account-stat-icon account-icon" alt="App Store">`;
+}
+
+  if (t === 'xbox') {
     return `<div style="
       width:52px;
       height:52px;
@@ -2388,7 +2406,7 @@ function cdkForm(c) {
   setTimeout(loadData, 1000);
 }
     
-    function accIcon(type) {
+    
   const t = String(type || '').toLowerCase();
 
   if (t === 'xbox') {
