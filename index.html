@@ -2122,6 +2122,39 @@ if (!ok) return;
   document.getElementById('modal-body').innerHTML = cdkForm(null);
   document.getElementById('modal').style.display = 'flex';
 }
+    function accIcon(type) {
+  const t = String(type || '').toLowerCase();
+
+  if (t === 'xbox') {
+    return `<div style="
+      width:52px;
+      height:52px;
+      border-radius:16px;
+      background:radial-gradient(circle at 30% 25%, #7cff7c, #16a34a 65%, #052e16);
+      display:grid;
+      place-items:center;
+      color:white;
+      font-size:30px;
+      font-weight:900;
+      box-shadow:0 0 22px #22c55e88;
+      flex-shrink:0;
+    ">X</div>`;
+  }
+
+  return `<div style="
+    width:52px;
+    height:52px;
+    border-radius:16px;
+    background:linear-gradient(135deg, #38bdf8, #2563eb, #7c3aed);
+    display:grid;
+    place-items:center;
+    color:white;
+    font-size:30px;
+    font-weight:900;
+    box-shadow:0 0 22px #38bdf888;
+    flex-shrink:0;
+  ">A</div>`;
+}
 
     function accountTypeChoice() {
   return `
