@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="uk">
 <head>
   <meta charset="UTF-8" />
@@ -317,7 +317,20 @@
     .cat-card {
       cursor: pointer;
     }
+    
+    .cat-card {
+      transition: 0.2s;
+    }
+    
+    .cat-card.active {
+      border: 1px solid #8b5cf6;
+      box-shadow: 0 0 25px #8b5cf660;
+    }
 
+    .cat-card.active {
+      border: 1px solid #8b5cf6;
+      box-shadow: 0 0 25px #8b5cf660;
+    }
     .cat-card.active {
       border-color: #6366f150;
       background: #6366f112;
@@ -825,13 +838,11 @@
       }
     }
     .cat-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
   object-fit: contain;
-  vertical-align: middle;
-  margin-right: 10px;
-  filter: drop-shadow(0 0 10px #ffffff22);
+  margin-right: 12px;
 }
 
 .cat-icon.spotify { filter: drop-shadow(0 0 14px #22c55e88); }
@@ -839,6 +850,36 @@
 .cat-icon.chatgpt { filter: drop-shadow(0 0 14px #10b98188); }
 .cat-icon.grok {
   filter: invert(1) brightness(1.7) drop-shadow(0 0 14px #8b5cf688);
+}
+    .actions-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: white;
+  font-weight: 700;
+}
+
+.btn-secondary {
+  background: #ffffff10;
+  border: 1px solid #ffffff20;
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #ddd;
+  font-weight: 700;
+}
+
+.cdk-select {
+  width: 18px;
+  height: 18px;
+  accent-color: #8b5cf6;
 }
   </style>
 </head>
@@ -949,6 +990,7 @@
       </div>
 
       <div class="chips" id="chips"></div>
+      <div class="actions-bar" id="actions-bar"></div>
       <div class="cards" id="cards"></div>
     </main>
   </div>
@@ -986,6 +1028,7 @@
     let filterCategory = 'all';
     let editId = null;
     let pollTimer = null;
+    let selected = new Set();
 
     function tryLogin() {
   const pw = document.getElementById('pw-input').value;
@@ -1207,6 +1250,7 @@
 
 function render() {
       renderChips();
+      renderActions();
 
       const q = document.getElementById('search').value.toLowerCase();
       const el = document.getElementById('cards');
@@ -1284,6 +1328,63 @@ function render() {
       `;
     }
 
+    function renderActions() {
+  const el = document.getElementById('actions-bar');
+
+  if (!el || !isAdmin || currentTab !== 'cdks') {
+    if (el) el.innerHTML = '';
+    return;
+  }
+
+  el.innerHTML = `
+    <button class="btn-secondary" onclick="deleteSelectedCdks()">🗑 Видалити вибрані</button>
+    <button class="btn-danger" onclick="deleteFilteredCdks()">🗑 Видалити цей список</button>
+  `;
+}
+
+function toggleSelect(id) {
+  if (selected.has(id)) selected.delete(id);
+  else selected.add(id);
+  render();
+}
+
+async function deleteSelectedCdks() {
+  if (!selected.size) return alert('Нічого не вибрано');
+
+  if (!confirm(`Видалити ${selected.size} вибраних CDK?`)) return;
+
+  await postApi({
+    type: 'cdk',
+    action: 'deleteRows',
+    rows: Array.from(selected)
+  });
+
+  selected.clear();
+  setTimeout(loadData, 1000);
+}
+
+async function deleteFilteredCdks() {
+  const list = cdks.filter(c => {
+    if (filterUsed === 'active' && c._used) return false;
+    if (filterUsed === 'used' && !c._used) return false;
+    if (filterCategory !== 'all' && c.category !== filterCategory) return false;
+    return true;
+  });
+
+  if (!list.length) return alert('Немає що видаляти');
+
+  if (!confirm(`Видалити ${list.length} CDK з поточного списку?`)) return;
+
+  await postApi({
+    type: 'cdk',
+    action: 'deleteRows',
+    rows: list.map(x => x._id)
+  });
+
+  selected.clear();
+  setTimeout(loadData, 1000);
+}
+
     function toggleAccPass(id, pw) {
       const el = document.getElementById('pv-' + id);
       if (!el) return;
@@ -1296,6 +1397,74 @@ function render() {
         el.classList.add('show');
       }
     }
+
+    function renderActions() {
+  const el = document.getElementById('actions-bar');
+
+  if (!el || !isAdmin || currentTab !== 'cdks') {
+    if (el) el.innerHTML = '';
+    return;
+  }
+
+  el.innerHTML = `
+    <button class="btn-secondary" onclick="deleteSelectedCdks()">
+      🗑 Видалити вибрані
+    </button>
+
+    <button class="btn-danger" onclick="deleteFilteredCdks()">
+      🗑 Видалити цей список
+    </button>
+  `;
+}
+
+function toggleSelect(id) {
+  if (selected.has(id)) selected.delete(id);
+  else selected.add(id);
+  render();
+}
+
+async function deleteSelectedCdks() {
+  if (!selected.size) {
+    alert('Нічого не вибрано');
+    return;
+  }
+
+  if (!confirm(`Видалити ${selected.size} вибраних CDK?`)) return;
+
+  await postApi({
+    type: 'cdk',
+    action: 'deleteRows',
+    rows: Array.from(selected)
+  });
+
+  selected.clear();
+  setTimeout(loadData, 1000);
+}
+
+async function deleteFilteredCdks() {
+  const list = cdks.filter(c => {
+    if (filterUsed === 'active' && c._used) return false;
+    if (filterUsed === 'used' && !c._used) return false;
+    if (filterCategory !== 'all' && c.category !== filterCategory) return false;
+    return true;
+  });
+
+  if (!list.length) {
+    alert('Немає що видаляти');
+    return;
+  }
+
+  if (!confirm(`Видалити ${list.length} CDK з поточного списку?`)) return;
+
+  await postApi({
+    type: 'cdk',
+    action: 'deleteRows',
+    rows: list.map(x => x._id)
+  });
+
+  selected.clear();
+  setTimeout(loadData, 1000);
+}
 
     function cdkCard(c) {
       const adminBtns = isAdmin ? `
