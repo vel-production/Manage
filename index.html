@@ -1499,7 +1499,7 @@ function render() {
       `;
     }
 
-    function cdkForm(c) {
+function cdkForm(c) {
   const used = c ? c._used : false;
   const cat = c?.category || (filterCategory !== 'all' ? filterCategory : 'Spotify');
 
@@ -1516,18 +1516,35 @@ function render() {
 
       <div class="form-field">
         <label class="form-label">CDK Код</label>
+
         ${c ? `
-          <input class="form-input code-inp" id="f-code" value="${esc(c?.code || '')}" oninput="this.value=this.value.toUpperCase()">
+          <input
+            class="form-input code-inp"
+            id="f-code"
+            value="${esc(c?.code || '')}"
+            oninput="this.value=this.value.toUpperCase()"
+          >
         ` : `
-          <textarea class="form-input code-inp" id="f-bulk-codes" style="min-height:180px" placeholder="Встав ключі сюди. Можна 1 або багато кодів одразу"></textarea>
+          <textarea
+            class="form-input code-inp"
+            id="f-bulk-codes"
+            style="min-height:180px;letter-spacing:1px;"
+            placeholder="Встав один або багато CDK кодів сюди"
+          ></textarea>
         `}
       </div>
 
       <div class="status-row">
         <span class="form-label" style="margin:0">Статус:</span>
-        <button class="btn-toggle ${used ? 'used' : 'active'}" id="f-status-btn" onclick="toggleFormStatus()">
+
+        <button
+          class="btn-toggle ${used ? 'used' : 'active'}"
+          id="f-status-btn"
+          onclick="toggleFormStatus()"
+        >
           ${used ? '✗ Використано' : '✓ Активний'}
         </button>
+
         <input type="hidden" id="f-status" value="${used}">
       </div>
 
