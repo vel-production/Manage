@@ -1,199 +1,1624 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Акаунт Менеджер</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #07090f;
-    --surface: #0d1117;
-    --surface2: #111827;
-    --border: #ffffff0f;
-    --border2: #ffffff18;
-    --text: #e2e8f0;
-    --muted: #6b7280;
-    --muted2: #374151;
-    --accent: #6366f1;
-    --accent2: #8b5cf6;
-    --green: #22c55e;
-    --red: #ef4444;
-    --mono: 'JetBrains Mono', monospace;
-    --body: 'Outfit', sans-serif;
-  }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { font-size: 15px; }
-  body { background: var(--bg); color: var(--text); font-family: var(--body); min-height: 100vh; }
-  a { color: #818cf8; text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  button { cursor: pointer; font-family: var(--body); transition: opacity .15s, background .15s; }
-  button:active { opacity: .75; }
-  input, textarea { font-family: var(--body); }
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
-  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 20px; position: sticky; top: 0; z-index: 100; }
-  .header-inner { max-width: 760px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  .logo { display: flex; align-items: center; gap: 12px; }
-  .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-  .logo-title { font-family: var(--mono); font-size: 15px; font-weight: 700; color: var(--text); }
-  .logo-sub { font-size: 11px; color: var(--muted); font-family: var(--mono); margin-top: 1px; }
-  .header-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
-  .role-badge { display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-family: var(--mono); font-size: 11px; font-weight: 700; border: 1px solid; }
-  .role-badge.admin { background: #6366f115; border-color: #6366f130; color: #a5b4fc; }
-  .role-badge.worker { background: #ffffff08; border-color: var(--border2); color: var(--muted); }
-  .btn-ghost { background: #ffffff08; border: 1px solid var(--border2); border-radius: 8px; padding: 6px 12px; color: var(--muted); font-size: 13px; }
-  .btn-ghost:hover { background: #ffffff12; }
-  .btn-refresh { background: none; border: none; color: var(--muted2); padding: 6px; border-radius: 6px; }
-  .btn-refresh:hover { color: var(--muted); background: #fff1; }
-  main { max-width: 760px; margin: 0 auto; padding: 24px 16px 80px; }
-  #login-screen { min-height: 80vh; display: flex; align-items: center; justify-content: center; }
-  .login-card { background: var(--surface2); border: 1px solid var(--border2); border-radius: 20px; padding: 36px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 32px 80px #0009; }
-  .login-card h2 { font-family: var(--mono); font-size: 19px; color: var(--text); margin: 16px 0 6px; }
-  .login-card p { color: var(--muted); font-size: 13px; margin-bottom: 28px; }
-  .login-section { background: #1f293780; border-radius: 12px; padding: 18px; margin-bottom: 14px; }
-  .login-section small { display: block; color: #9ca3af; font-size: 12px; margin-bottom: 14px; line-height: 1.5; }
-  .pass-wrap { position: relative; margin-bottom: 12px; }
-  .pass-wrap input { width: 100%; background: var(--bg); border: 1px solid var(--border2); border-radius: 8px; padding: 10px 40px 10px 12px; color: var(--text); font-size: 14px; letter-spacing: 3px; text-align: center; outline: none; }
-  .pass-wrap input:focus { border-color: var(--accent); }
-  .pass-wrap input.err { border-color: var(--red) !important; animation: shake .3s; }
-  .pass-toggle { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #555; }
-  .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 8px; padding: 11px 20px; color: #fff; font-size: 14px; font-family: var(--mono); font-weight: 700; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
-  .btn-primary:hover { opacity: .9; }
-  .btn-worker { background: #ffffff08; border: 1px solid var(--border2); border-radius: 8px; padding: 11px 20px; color: var(--muted); font-size: 14px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
-  .btn-worker:hover { background: #ffffff12; }
-  .err-msg { color: #f87171; font-size: 12px; margin-bottom: 10px; }
-  .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 22px; }
-  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
-  .stat-val { font-family: var(--mono); font-size: 26px; font-weight: 700; }
-  .stat-lbl { font-size: 11px; color: var(--muted); margin-top: 3px; }
-  .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
-  .tab-btn { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); font-family: var(--mono); font-size: 13px; font-weight: 700; }
-  .tab-btn.active { background: linear-gradient(135deg, var(--accent), var(--accent2)); border-color: transparent; color: #fff; }
-  .toolbar { display: flex; gap: 10px; margin-bottom: 14px; align-items: center; }
-  .search-wrap { flex: 1; position: relative; }
-  .search-wrap svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted2); pointer-events: none; }
-  .search-wrap input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px 10px 36px; color: var(--text); font-size: 14px; outline: none; }
-  .search-wrap input:focus { border-color: var(--accent); }
-  .btn-add { background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 8px; padding: 10px 16px; color: #fff; font-family: var(--mono); font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
-  .chips { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
-  .chip { padding: 5px 13px; border-radius: 20px; border: 1px solid var(--border2); background: transparent; color: var(--muted); font-size: 12px; font-family: var(--mono); }
-  .chip.active { border-color: var(--accent); background: #6366f118; color: #a5b4fc; }
-  .sync-info { text-align: right; font-size: 11px; color: var(--muted2); font-family: var(--mono); margin-bottom: 16px; }
-  .cards { display: grid; gap: 12px; }
-  .empty { text-align: center; color: var(--muted2); padding: 48px 0; font-family: var(--mono); font-size: 13px; }
-  .acc-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; transition: border-color .2s; }
-  .acc-card:hover { border-color: #6366f130; }
-  .card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
-  .type-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 8px; font-family: var(--mono); font-size: 12px; }
-  .type-xbox { background: #107c1018; color: #86efac; }
-  .type-itunes { background: #fc3c4418; color: #fda4af; }
-  .price-badge { background: #f59e0b15; color: #fbbf24; border-radius: 8px; padding: 3px 10px; font-family: var(--mono); font-size: 12px; }
-  .card-actions { display: flex; gap: 6px; }
-  .btn-icon { border-radius: 6px; padding: 5px 7px; display: flex; align-items: center; justify-content: center; }
-  .btn-edit { background: #ffffff08; border: 1px solid var(--border2); color: var(--muted); }
-  .btn-del { background: #ef444410; border: 1px solid #ef444430; color: #f87171; }
-  .card-fields { display: grid; gap: 10px; }
-  .field-row { display: flex; align-items: center; gap: 10px; min-width: 0; }
-  .field-key { color: #4b5563; font-size: 11px; width: 48px; font-family: var(--mono); flex-shrink: 0; }
-  .field-val { color: var(--text); font-family: var(--mono); font-size: 13px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .field-val.pass { letter-spacing: 4px; }
-  .field-val.pass.show { letter-spacing: 1px; }
-  .btn-eye { background: none; border: none; color: #555; padding: 2px; }
-  .field-note { background: #ffffff05; border-radius: 8px; padding: 7px 10px; margin-top: 4px; font-size: 12px; color: var(--muted); }
-  .cdk-card { background: var(--surface); border: 2px solid; border-radius: 14px; padding: 18px; transition: all .2s; }
-  .cdk-card.active { border-color: #22c55e30; }
-  .cdk-card.used { border-color: #ef444428; opacity: .6; }
-  .cdk-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
-  .cdk-title { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 14px; color: var(--text); }
-  .cdk-controls { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-  .btn-toggle { padding: 4px 13px; border-radius: 20px; border: none; font-family: var(--mono); font-size: 11px; font-weight: 700; }
-  .btn-toggle.active { background: #22c55e18; color: #4ade80; }
-  .btn-toggle.used { background: #ef444418; color: #f87171; }
-  .cdk-code-box { background: #060a10; border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
-  .cdk-code { font-family: var(--mono); font-size: 15px; letter-spacing: 3px; flex: 1; overflow-wrap: anywhere; }
-  .cdk-code.active { color: #c4b5fd; }
-  .cdk-code.masked { color: #4b5563; }
-  .cdk-code-actions { display: flex; gap: 6px; flex-shrink: 0; }
-  .btn-copy { background: #ffffff10; border: 1px solid var(--border2); border-radius: 6px; padding: 2px 8px; color: #888; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
-  .btn-copy.ok { background: #22c55e18; border-color: #22c55e55; color: #4ade80; }
-  .btn-reveal { background: none; border: 1px solid var(--border2); border-radius: 6px; padding: 5px 7px; color: #555; }
-  .modal-overlay { position: fixed; inset: 0; background: #000c; z-index: 999; display: flex; align-items: center; justify-content: center; padding: 16px; }
-  .modal-box { background: var(--surface2); border: 1px solid var(--border2); border-radius: 18px; padding: 28px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 80px #0009; }
-  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-  .modal-title { font-family: var(--mono); font-size: 17px; color: var(--text); }
-  .btn-close { background: none; border: none; color: #666; padding: 4px; }
-  .form-field { margin-bottom: 16px; }
-  .form-label { display: block; margin-bottom: 6px; font-size: 11px; color: var(--muted); font-family: var(--mono); text-transform: uppercase; letter-spacing: 1px; }
-  .form-input { width: 100%; background: var(--bg); border: 1px solid var(--border2); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 14px; outline: none; }
-  .form-input:focus { border-color: var(--accent); }
-  textarea.form-input { resize: vertical; min-height: 56px; }
-  .form-input.code-inp { font-family: var(--mono); letter-spacing: 2px; font-size: 13px; }
-  .pass-field { position: relative; }
-  .pass-field .form-input { padding-right: 40px; }
-  .pass-field .pass-toggle { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #555; }
-  .type-btns { display: flex; gap: 8px; }
-  .type-btn { flex: 1; padding: 10px; border-radius: 8px; border: 2px solid var(--border2); background: transparent; color: var(--muted); font-family: var(--mono); font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-  .type-btn.sel { border-color: var(--accent); background: #6366f118; color: #a5b4fc; }
-  .status-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-  .form-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
-  .btn-cancel { background: #ffffff08; border: 1px solid var(--border2); border-radius: 8px; padding: 10px 20px; color: var(--muted); font-size: 14px; }
-  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
-  @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-  .fade { animation: fadeIn .25s ease; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Акаунт Менеджер</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #07090f;
+      --surface: #0d1117;
+      --surface2: #111827;
+      --border: #ffffff0f;
+      --border2: #ffffff18;
+      --text: #e2e8f0;
+      --muted: #6b7280;
+      --muted2: #374151;
+      --accent: #6366f1;
+      --accent2: #8b5cf6;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --mono: 'JetBrains Mono', monospace;
+      --body: 'Outfit', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 15px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--body);
+      min-height: 100vh;
+    }
+
+    button {
+      cursor: pointer;
+      font-family: var(--body);
+      transition: opacity .15s, background .15s, border-color .15s;
+    }
+
+    button:active {
+      opacity: .75;
+    }
+
+    input,
+    textarea,
+    select {
+      font-family: var(--body);
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .logo-icon img,
+    .login-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .login-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 22px;
+      margin: 0 auto;
+      overflow: hidden;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: 1px solid var(--border2);
+    }
+
+    .logo-title {
+      font-family: var(--mono);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .logo-sub {
+      font-size: 11px;
+      color: var(--muted);
+      font-family: var(--mono);
+      margin-top: 1px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .role-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid;
+    }
+
+    .role-badge.admin {
+      background: #6366f115;
+      border-color: #6366f130;
+      color: #a5b4fc;
+    }
+
+    .role-badge.worker {
+      background: #ffffff08;
+      border-color: var(--border2);
+      color: var(--muted);
+    }
+
+    .btn-ghost {
+      background: #ffffff08;
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 6px 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .btn-refresh {
+      background: none;
+      border: none;
+      color: var(--muted2);
+      padding: 6px;
+      border-radius: 6px;
+      font-size: 18px;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px 16px 80px;
+    }
+
+    #login-screen {
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-card {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      padding: 36px;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+      box-shadow: 0 32px 80px #0009;
+    }
+
+    .login-card h2 {
+      font-family: var(--mono);
+      font-size: 19px;
+      color: var(--text);
+      margin: 16px 0 6px;
+    }
+
+    .login-card p {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 28px;
+    }
+
+    .login-section {
+      background: #1f293780;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+
+    .login-section small {
+      display: block;
+      color: #9ca3af;
+      font-size: 12px;
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    .pass-wrap {
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .pass-wrap input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 10px 40px 10px 12px;
+      color: var(--text);
+      font-size: 14px;
+      letter-spacing: 3px;
+      text-align: center;
+      outline: none;
+    }
+
+    .pass-toggle {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #555;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      border-radius: 8px;
+      padding: 11px 20px;
+      color: #fff;
+      font-size: 14px;
+      font-family: var(--mono);
+      font-weight: 700;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-worker {
+      background: #ffffff08;
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 11px 20px;
+      color: var(--muted);
+      font-size: 14px;
+      width: 100%;
+    }
+
+    .err-msg {
+      color: #f87171;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    .stats,
+    .cat-stats {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .stats {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .cat-stats {
+      grid-template-columns: repeat(4, 1fr);
+      margin-bottom: 22px;
+    }
+
+    .stat-card,
+    .cat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .cat-card {
+      cursor: pointer;
+    }
+
+    .cat-card.active {
+      border-color: #6366f150;
+      background: #6366f112;
+    }
+
+    .stat-val,
+    .cat-num {
+      font-family: var(--mono);
+      font-size: 26px;
+      font-weight: 700;
+    }
+
+    .cat-num {
+      font-size: 18px;
+    }
+
+    .stat-lbl,
+    .cat-row {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .cat-name {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .cat-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-color: transparent;
+      color: #fff;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+      align-items: center;
+    }
+
+    .search-wrap {
+      flex: 1;
+      position: relative;
+    }
+
+    .search-wrap input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px 10px 12px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+    }
+
+    .btn-add {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      color: #fff;
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .chips {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      padding: 5px 13px;
+      border-radius: 20px;
+      border: 1px solid var(--border2);
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      font-family: var(--mono);
+    }
+
+    .chip.active {
+      border-color: var(--accent);
+      background: #6366f118;
+      color: #a5b4fc;
+    }
+
+    .sync-info {
+      text-align: right;
+      font-size: 11px;
+      color: var(--muted2);
+      font-family: var(--mono);
+      margin-bottom: 16px;
+    }
+
+    .cards {
+      display: grid;
+      gap: 12px;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted2);
+      padding: 48px 0;
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+
+    .acc-card,
+    .cdk-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+    }
+
+    .cdk-card.active {
+      border: 2px solid #22c55e30;
+    }
+
+    .cdk-card.used {
+      border: 2px solid #ef444428;
+      opacity: .65;
+    }
+
+    .card-head,
+    .cdk-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .type-badge,
+    .category-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 12px;
+      background: #6366f118;
+      color: #a5b4fc;
+    }
+
+    .type-xbox {
+      background: #107c1018;
+      color: #86efac;
+    }
+
+    .type-itunes {
+      background: #fc3c4418;
+      color: #fda4af;
+    }
+
+    .price-badge {
+      background: #f59e0b15;
+      color: #fbbf24;
+      border-radius: 8px;
+      padding: 3px 10px;
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+
+    .card-actions,
+    .cdk-controls {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-icon {
+      border-radius: 6px;
+      padding: 5px 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-edit {
+      background: #ffffff08;
+      border: 1px solid var(--border2);
+      color: var(--muted);
+    }
+
+    .btn-del {
+      background: #ef444410;
+      border: 1px solid #ef444430;
+      color: #f87171;
+    }
+
+    .card-fields {
+      display: grid;
+      gap: 10px;
+    }
+
+    .field-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .field-key {
+      color: #4b5563;
+      font-size: 11px;
+      width: 48px;
+      font-family: var(--mono);
+      flex-shrink: 0;
+    }
+
+    .field-val {
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .field-val.pass {
+      letter-spacing: 4px;
+    }
+
+    .field-val.pass.show {
+      letter-spacing: 1px;
+    }
+
+    .field-note {
+      background: #ffffff05;
+      border-radius: 8px;
+      padding: 7px 10px;
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .cdk-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 14px;
+      color: var(--text);
+      flex-wrap: wrap;
+    }
+
+    .btn-toggle {
+      padding: 4px 13px;
+      border-radius: 20px;
+      border: none;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .btn-toggle.active {
+      background: #22c55e18;
+      color: #4ade80;
+    }
+
+    .btn-toggle.used {
+      background: #ef444418;
+      color: #f87171;
+    }
+
+    .cdk-code-box {
+      background: #060a10;
+      border-radius: 10px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .cdk-code {
+      font-family: var(--mono);
+      font-size: 15px;
+      letter-spacing: 3px;
+      flex: 1;
+      overflow-wrap: anywhere;
+    }
+
+    .cdk-code.active {
+      color: #c4b5fd;
+    }
+
+    .cdk-code.masked {
+      color: #4b5563;
+    }
+
+    .btn-copy,
+    .btn-reveal {
+      background: #ffffff10;
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      padding: 4px 8px;
+      color: #888;
+      font-size: 11px;
+    }
+
+    .btn-copy.ok {
+      background: #22c55e18;
+      border-color: #22c55e55;
+      color: #4ade80;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: #000c;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-box {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 18px;
+      padding: 28px;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 80px #0009;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .modal-title {
+      font-family: var(--mono);
+      font-size: 17px;
+      color: var(--text);
+    }
+
+    .btn-close {
+      background: none;
+      border: none;
+      color: #666;
+      padding: 4px;
+      font-size: 18px;
+    }
+
+    .form-field {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 11px;
+      color: var(--muted);
+      font-family: var(--mono);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+    }
+
+    textarea.form-input {
+      resize: vertical;
+      min-height: 56px;
+    }
+
+    .form-input.code-inp {
+      font-family: var(--mono);
+      letter-spacing: 2px;
+      font-size: 13px;
+    }
+
+    .pass-field {
+      position: relative;
+    }
+
+    .pass-field .form-input {
+      padding-right: 40px;
+    }
+
+    .pass-field .pass-toggle {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #555;
+    }
+
+    .type-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .type-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: 2px solid var(--border2);
+      background: transparent;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+
+    .type-btn.sel {
+      border-color: var(--accent);
+      background: #6366f118;
+      color: #a5b4fc;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .form-footer {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 4px;
+    }
+
+    .btn-cancel {
+      background: #ffffff08;
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 10px 20px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 720px) {
+      .stats,
+      .cat-stats {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
 </head>
+
 <body>
-<div id="login-screen"><div class="login-card fade"><div class="logo-icon" style="margin:0 auto;font-size:26px;">🎮</div><h2>АКАУНТ МЕНЕДЖЕР</h2><p>Xbox · iTunes · CDK</p><div class="login-section"><small>Введіть пароль адміна для повного доступу (додавати, редагувати, видаляти)</small><div class="pass-wrap"><input type="password" id="pw-input" placeholder="Пароль адміна" onkeydown="if(event.key==='Enter')tryLogin()"><button class="pass-toggle" onclick="togglePw('pw-input',this)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div><div class="err-msg" id="pw-err" style="display:none">Невірний пароль</div><button class="btn-primary" onclick="tryLogin()">Увійти як Адмін</button></div><button class="btn-worker" onclick="enterAsWorker()">Переглянути (без пароля)</button></div></div>
-<div id="app" style="display:none"><header><div class="header-inner"><div class="logo"><div class="logo-icon">🎮</div><div><div class="logo-title">АКАУНТ МЕНЕДЖЕР</div><div class="logo-sub">Xbox · iTunes · CDK</div></div></div><div class="header-right"><button class="btn-refresh" onclick="loadData()" title="Оновити">↻</button><div class="role-badge" id="role-badge"></div><button class="btn-ghost" onclick="logout()">Вийти</button></div></div></header><main><div class="stats" id="stats"><div class="stat-card"><div class="stat-val" id="s-acc" style="color:#818cf8">0</div><div class="stat-lbl">Акаунти</div></div><div class="stat-card"><div class="stat-val" id="s-active" style="color:#4ade80">0</div><div class="stat-lbl">CDK активні</div></div><div class="stat-card"><div class="stat-val" id="s-used" style="color:#f87171">0</div><div class="stat-lbl">CDK використані</div></div></div><div class="sync-info" id="sync-info"></div><div class="tabs"><button class="tab-btn active" id="tab-accounts" onclick="switchTab('accounts')">👤 Акаунти</button><button class="tab-btn" id="tab-cdks" onclick="switchTab('cdks')">🔑 CDK Коди</button></div><div class="toolbar"><div class="search-wrap"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="search" placeholder="Пошук..." oninput="render()"></div><button class="btn-add" id="btn-add" onclick="openAddModal()" style="display:none">＋ Додати</button></div><div class="chips" id="chips"></div><div class="cards" id="cards"></div></main></div>
-<div class="modal-overlay" id="modal" style="display:none" onclick="closeModal()"><div class="modal-box fade" onclick="event.stopPropagation()"><div class="modal-header"><div class="modal-title" id="modal-title"></div><button class="btn-close" onclick="closeModal()">✕</button></div><div id="modal-body"></div></div></div>
-<script>
-const SHEET_ID = '1-yF9f9LepfGBpg1fyhewTcgT7oePscPEScD9v-8Ggn4';
-const API_URL = 'https://script.google.com/macros/s/AKfycbyr6Z6OJk_jbGMQ3KbqDklFo-lHYUpsLO9RxiTTDgLItnIuTAZnIXpLa0PXBmjPs_xZ/exec';
-const ADMIN_PASS = 'admin123';
-const POLL_MS = 15000;
-const csvAcc = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Accounts`;
-const csvCdk = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=CDK`;
-let isAdmin = false, accounts = [], cdks = [], currentTab = 'accounts', filterType = 'all', filterUsed = 'all', editId = null, pollTimer = null;
-function tryLogin(){const pw=document.getElementById('pw-input').value,err=document.getElementById('pw-err');if(pw===ADMIN_PASS){isAdmin=true;startApp()}else{err.style.display='block';document.getElementById('pw-input').classList.add('err');setTimeout(()=>{err.style.display='none';document.getElementById('pw-input').classList.remove('err')},1500)}}
-function enterAsWorker(){isAdmin=false;startApp()} function logout(){clearInterval(pollTimer);document.getElementById('app').style.display='none';document.getElementById('login-screen').style.display='flex';document.getElementById('pw-input').value=''}
-function startApp(){document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='block';const badge=document.getElementById('role-badge');badge.className='role-badge '+(isAdmin?'admin':'worker');badge.innerHTML=isAdmin?'🔒 АДМІН':'👁 ПЕРЕГЛЯД';document.getElementById('btn-add').style.display=isAdmin?'flex':'none';loadData();pollTimer=setInterval(loadData,POLL_MS)}
-function parseCSV(text){const lines=text.trim().split('\n');if(lines.length<2)return[];const headers=parseLine(lines[0]);return lines.slice(1).map(line=>{const vals=parseLine(line),obj={};headers.forEach((h,i)=>obj[h.trim()]=(vals[i]||'').trim());return obj}).filter(r=>Object.values(r).some(v=>v))}
-function parseLine(line){const result=[];let cur='',inQ=false;for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++}else inQ=!inQ}else if(c===','&&!inQ){result.push(cur);cur=''}else cur+=c}result.push(cur);return result}
-async function loadData(){try{const [rA,rC]=await Promise.all([fetch(csvAcc+'&t='+Date.now()),fetch(csvCdk+'&t='+Date.now())]);accounts=parseCSV(await rA.text()).map((a,i)=>({...a,_id:i}));cdks=parseCSV(await rC.text()).map((c,i)=>({...c,_id:i,_used:(c.used||'').toLowerCase()==='true'||c.used==='1'}));updateStats();render();document.getElementById('sync-info').textContent='↻ '+new Date().toLocaleTimeString('uk-UA')+' · авто-оновлення 15с'}catch(e){document.getElementById('sync-info').textContent='⚠ Помилка завантаження — перевір налаштування таблиці'}}
-function updateStats(){document.getElementById('s-acc').textContent=accounts.length;const active=cdks.filter(c=>!c._used).length;document.getElementById('s-active').textContent=active;document.getElementById('s-used').textContent=cdks.length-active}
-function switchTab(tab){currentTab=tab;document.getElementById('tab-accounts').className='tab-btn'+(tab==='accounts'?' active':'');document.getElementById('tab-cdks').className='tab-btn'+(tab==='cdks'?' active':'');document.getElementById('search').value='';filterType='all';filterUsed='all';render()}
-function renderChips(){const c=document.getElementById('chips');if(currentTab==='accounts')c.innerHTML=['all','xbox','itunes'].map(v=>`<button class="chip${filterType===v?' active':''}" onclick="filterType='${v}';render()">${v==='all'?'Всі':v==='xbox'?'Xbox':'iTunes'}</button>`).join('');else c.innerHTML=['all','active','used'].map(v=>`<button class="chip${filterUsed===v?' active':''}" onclick="filterUsed='${v}';render()">${v==='all'?'Всі':v==='active'?'✓ Активні':'✗ Використані'}</button>`).join('')}
-function render(){renderChips();const q=document.getElementById('search').value.toLowerCase(),el=document.getElementById('cards');if(currentTab==='accounts'){let list=accounts.filter(a=>{if(filterType!=='all'&&(a.type||'').toLowerCase()!==filterType)return false;if(!q)return true;return ((a.login||'')+(a.note||'')+(a.rate||'')+(a.type||'')).toLowerCase().includes(q)});el.innerHTML=list.length?list.map(accCard).join(''):'<div class="empty">Акаунтів не знайдено</div>'}else{let list=cdks.filter(c=>{if(filterUsed==='active'&&c._used)return false;if(filterUsed==='used'&&!c._used)return false;if(!q)return true;return ((c.label||'')+(c.code||'')+(c.note||'')).toLowerCase().includes(q)});el.innerHTML=list.length?list.map(cdkCard).join(''):'<div class="empty">Кодів не знайдено</div>'}}
-function accCard(a){const xb=(a.type||'').toLowerCase()==='xbox';const adminBtns=isAdmin?`<div class="card-actions"><button class="btn-icon btn-edit" onclick="openEditAcc(${a._id})">${svgEdit}</button><button class="btn-icon btn-del" onclick="alert('Видалення акаунтів поки через таблицю')">${svgTrash}</button></div>`:'';const fields=[a.login?`<div class="field-row"><span class="field-key">LOGIN</span><span class="field-val">${esc(a.login)}</span>${copyBtn(a.login)}</div>`:'',a.password?`<div class="field-row"><span class="field-key">PASS</span><span class="field-val pass" id="pv-${a._id}">••••••••••••</span><button class="btn-eye" onclick="toggleAccPass(${a._id},'${esc(a.password)}')">${svgEye}</button>${copyBtn(a.password)}</div>`:'',a.link?`<div class="field-row"><span class="field-key">LINK</span><a href="${esc(a.link)}" target="_blank" style="flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(a.link)}</a>${copyBtn(a.link)}</div>`:'',a.phone_code?`<div class="field-row"><span class="field-key">TEL</span><span class="field-val">${esc(a.phone_code)}</span>${copyBtn(a.phone_code)}</div>`:''].filter(Boolean).join('');return `<div class="acc-card"><div class="card-head"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="type-badge ${xb?'type-xbox':'type-itunes'}">${xb?'🎮 Xbox':'🍎 iTunes'}</span>${a.rate?`<span class="price-badge">💰 ${esc(a.rate)}</span>`:''}</div>${adminBtns}</div><div class="card-fields">${fields}${a.note?`<div class="field-note">${esc(a.note)}</div>`:''}</div></div>`}
-function toggleAccPass(id,pw){const el=document.getElementById('pv-'+id);if(!el)return;if(el.classList.contains('show')){el.textContent='••••••••••••';el.classList.remove('show')}else{el.textContent=pw;el.classList.add('show')}}
-function cdkCard(c){const adminBtns=isAdmin?`<button class="btn-icon btn-edit" onclick="openEditCdk(${c._id})">${svgEdit}</button><button class="btn-icon btn-del" onclick="deleteCdk(${c._id})">${svgTrash}</button>`:'';const workerToggle=`<button class="btn-toggle ${c._used?'used':'active'}" onclick="workerToggleCdk(${c._id})">${c._used?'✗ Використано':'✓ Активний'}</button>`;const codeDisplay=c._used?`<span class="cdk-code masked" id="cc-${c._id}">${'•'.repeat((c.code||'').length)}</span><div class="cdk-code-actions"><button class="btn-reveal" onclick="revealCdk(${c._id},'${esc(c.code)}')">${svgEye}</button></div>`:`<span class="cdk-code active">${esc(c.code)}</span><div class="cdk-code-actions">${copyBtn(c.code)}</div>`;return `<div class="cdk-card ${c._used?'used':'active'}"><div class="cdk-head"><div class="cdk-title">${svgKey} ${esc(c.label||'CDK Код')}</div><div class="cdk-controls">${workerToggle}${adminBtns}</div></div><div class="cdk-code-box">${codeDisplay}</div>${c.note?`<div class="field-note" style="margin-top:10px">${esc(c.note)}</div>`:''}</div>`}
-function revealCdk(id,code){const el=document.getElementById('cc-'+id);if(el)el.textContent=el.textContent.includes('•')?code:'•'.repeat(code.length)}
-async function postApi(payload){await fetch(API_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(payload)})}
-async function workerToggleCdk(id){const c=cdks[id];if(!c)return;const newStatus=!c._used;await postApi({type:'cdk',action:'toggle',row:id,used:newStatus?'TRUE':'FALSE'});setTimeout(loadData,1000)}
-async function deleteCdk(id){if(!confirm('Видалити цей CDK?'))return;await postApi({type:'cdk',action:'delete',row:id});setTimeout(loadData,1000)}
-let copyTimers={};function copyText(text,btnEl){navigator.clipboard.writeText(text).then(()=>{btnEl.innerHTML=`${svgCheck} OK`;btnEl.classList.add('ok');clearTimeout(copyTimers[text]);copyTimers[text]=setTimeout(()=>{btnEl.innerHTML=`${svgCopy} Копія`;btnEl.classList.remove('ok')},1400)})} function copyBtn(text){return `<button class="btn-copy" onclick="copyText('${esc(text)}',this)">${svgCopy} Копія</button>`}
-function openAddModal(){editId=null;document.getElementById('modal-title').textContent=currentTab==='accounts'?'Новий акаунт':'Новий CDK';document.getElementById('modal-body').innerHTML=currentTab==='accounts'?accForm(null):cdkForm(null);document.getElementById('modal').style.display='flex'}
-function openEditAcc(id){editId=id;document.getElementById('modal-title').textContent='Редагувати акаунт';document.getElementById('modal-body').innerHTML=accForm(accounts[id]);document.getElementById('modal').style.display='flex'}
-function openEditCdk(id){editId=id;document.getElementById('modal-title').textContent='Редагувати CDK';document.getElementById('modal-body').innerHTML=cdkForm(cdks[id]);document.getElementById('modal').style.display='flex'}
-function closeModal(){document.getElementById('modal').style.display='none'}
-function accForm(a){const t=a?(a.type||'xbox').toLowerCase():'xbox';return `<div><div class="form-field"><label class="form-label">Тип</label><div class="type-btns"><button class="type-btn${t==='xbox'?' sel':''}" id="tb-xbox" onclick="selType('xbox')">🎮 Xbox</button><button class="type-btn${t==='itunes'?' sel':''}" id="tb-itunes" onclick="selType('itunes')">🍎 iTunes</button></div><input type="hidden" id="f-type" value="${t}"></div><div class="form-field"><label class="form-label">Логін / Email</label><input class="form-input" id="f-login" value="${esc(a?.login||'')}"></div><div class="form-field"><label class="form-label">Пароль</label><div class="pass-field"><input class="form-input" type="password" id="f-pass" value="${esc(a?.password||'')}"><button class="pass-toggle" onclick="togglePw('f-pass',this)">${svgEye}</button></div></div><div class="form-field"><label class="form-label">Посилання</label><input class="form-input" id="f-link" value="${esc(a?.link||'')}"></div><div class="form-field"><label class="form-label">Телефон / 2FA</label><input class="form-input" id="f-phone" value="${esc(a?.phone_code||'')}"></div><div class="form-field"><label class="form-label">Ціна</label><input class="form-input" id="f-rate" value="${esc(a?.rate||'')}"></div><div class="form-field"><label class="form-label">Нотатка</label><textarea class="form-input" id="f-note">${esc(a?.note||'')}</textarea></div><div class="form-field" style="background:#f59e0b10;border:1px solid #f59e0b30;border-radius:10px;padding:12px;font-size:12px;color:#fbbf24">💡 Акаунти поки додаються через копіювання рядка в Google Таблицю.</div><div class="form-footer"><button class="btn-cancel" onclick="closeModal()">Скасувати</button><button class="btn-primary" style="width:auto" onclick="saveAccForm()">Зберегти</button></div></div>`}
-function cdkForm(c){const used=c?c._used:false;return `<div><div class="form-field"><label class="form-label">Назва / Гра</label><input class="form-input" id="f-label" value="${esc(c?.label||'')}"></div><div class="form-field"><label class="form-label">CDK Код</label><input class="form-input code-inp" id="f-code" value="${esc(c?.code||'')}" oninput="this.value=this.value.toUpperCase()"></div><div class="status-row"><span class="form-label" style="margin:0">Статус:</span><button class="btn-toggle ${used?'used':'active'}" id="f-status-btn" onclick="toggleFormStatus()">${used?'✗ Використано':'✓ Активний'}</button><input type="hidden" id="f-status" value="${used}"></div><div class="form-field"><label class="form-label">Нотатка</label><textarea class="form-input" id="f-note">${esc(c?.note||'')}</textarea></div><div class="form-footer"><button class="btn-cancel" onclick="closeModal()">Скасувати</button><button class="btn-primary" style="width:auto" onclick="saveCdkForm()">Зберегти</button></div></div>`}
-function selType(t){document.getElementById('f-type').value=t;document.getElementById('tb-xbox').className='type-btn'+(t==='xbox'?' sel':'');document.getElementById('tb-itunes').className='type-btn'+(t==='itunes'?' sel':'')}
-function toggleFormStatus(){const inp=document.getElementById('f-status'),btn=document.getElementById('f-status-btn'),now=inp.value==='true';inp.value=!now;btn.className='btn-toggle '+(!now?'used':'active');btn.textContent=!now?'✗ Використано':'✓ Активний'}
-function saveAccForm(){const data={type:document.getElementById('f-type').value,login:document.getElementById('f-login').value,password:document.getElementById('f-pass').value,link:document.getElementById('f-link').value,phone_code:document.getElementById('f-phone').value,rate:document.getElementById('f-rate').value,note:document.getElementById('f-note').value};prompt('Скопіюй рядок для таблиці Accounts (Ctrl+C):',`${data.type}\t${data.login}\t${data.password}\t${data.link}\t${data.phone_code}\t${data.rate}\t${data.note}`);closeModal()}
-async function saveCdkForm(){const isEdit=editId!==null;await postApi({type:'cdk',action:isEdit?'update':'add',row:editId,label:document.getElementById('f-label').value,code:document.getElementById('f-code').value,used:document.getElementById('f-status').value==='true'?'TRUE':'FALSE',note:document.getElementById('f-note').value});closeModal();setTimeout(loadData,1000)}
-function togglePw(id,btn){const inp=document.getElementById(id);inp.type=inp.type==='password'?'text':'password';btn.innerHTML=inp.type==='password'?svgEye:svgEyeOff}
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
-const svgXbox=''; const svgApple='';
-const svgKey=`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>`;
-const svgEye=`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
-const svgEyeOff=`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
-const svgCopy=`<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
-const svgCheck=`<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`;
-const svgEdit=`<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
-const svgTrash=`<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`;
-</script>
+  <div id="login-screen">
+    <div class="login-card fade">
+      <div class="login-avatar">
+        <img src="avatar.png" alt="PixelDrop avatar" />
+      </div>
+
+      <h2>АКАУНТ МЕНЕДЖЕР</h2>
+      <p>Xbox · iTunes · CDK</p>
+
+      <div class="login-section">
+        <small>Введіть пароль адміна для повного доступу</small>
+
+        <div class="pass-wrap">
+          <input
+            type="password"
+            id="pw-input"
+            placeholder="Пароль адміна"
+            onkeydown="if(event.key==='Enter')tryLogin()"
+          />
+
+          <button class="pass-toggle" onclick="togglePw('pw-input',this)">
+            👁
+          </button>
+        </div>
+
+        <div class="err-msg" id="pw-err" style="display:none">
+          Невірний пароль
+        </div>
+
+        <button class="btn-primary" onclick="tryLogin()">
+          Увійти як Адмін
+        </button>
+      </div>
+
+      <button class="btn-worker" onclick="enterAsWorker()">
+        Переглянути без пароля
+      </button>
+    </div>
+  </div>
+
+  <div id="app" style="display:none">
+    <header>
+      <div class="header-inner">
+        <div class="logo">
+          <div class="logo-icon">
+            <img src="avatar.png" alt="PixelDrop avatar" />
+          </div>
+
+          <div>
+            <div class="logo-title">АКАУНТ МЕНЕДЖЕР</div>
+            <div class="logo-sub">Xbox · iTunes · CDK</div>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <button class="btn-refresh" onclick="loadData()" title="Оновити">↻</button>
+          <div class="role-badge" id="role-badge"></div>
+          <button class="btn-ghost" onclick="logout()">Вийти</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-val" id="s-acc" style="color:#818cf8">0</div>
+          <div class="stat-lbl">Акаунти</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-val" id="s-active" style="color:#4ade80">0</div>
+          <div class="stat-lbl">CDK активні</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-val" id="s-used-total" style="color:#f87171">0</div>
+          <div class="stat-lbl">Використані всього</div>
+        </div>
+      </div>
+
+      <div class="cat-stats" id="cat-stats"></div>
+
+      <div class="sync-info" id="sync-info"></div>
+
+      <div class="tabs">
+        <button class="tab-btn active" id="tab-accounts" onclick="switchTab('accounts')">
+          👤 Акаунти
+        </button>
+
+        <button class="tab-btn" id="tab-cdks" onclick="switchTab('cdks')">
+          🔑 CDK Коди
+        </button>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-wrap">
+          <input type="text" id="search" placeholder="Пошук..." oninput="render()" />
+        </div>
+
+        <button class="btn-add" id="btn-add" onclick="openAddModal()" style="display:none">
+          ＋ Додати
+        </button>
+      </div>
+
+      <div class="chips" id="chips"></div>
+      <div class="cards" id="cards"></div>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="modal" style="display:none" onclick="closeModal()">
+    <div class="modal-box fade" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title" id="modal-title"></div>
+        <button class="btn-close" onclick="closeModal()">✕</button>
+      </div>
+
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <script>
+    const SHEET_ID = '1-yF9f9LepfGBpg1fyhewTcgT7oePscPEScD9v-8Ggn4';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyr6Z6OJk_jbGMQ3KbqDklFo-lHYUpsLO9RxiTTDgLItnIuTAZnIXpLa0PXBmjPs_xZ/exec';
+    const ADMIN_PASS = 'admin123';
+    const POLL_MS = 15000;
+
+    const CATEGORIES = ['Spotify', 'Claude', 'ChatGPT', 'Grok'];
+
+    const csvAcc = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Accounts`;
+    const csvCdk = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=CDK`;
+    const csvStats = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Stats`;
+
+    let isAdmin = false;
+    let accounts = [];
+    let cdks = [];
+    let statsRows = [];
+    let currentTab = 'accounts';
+    let filterType = 'all';
+    let filterUsed = 'all';
+    let filterCategory = 'all';
+    let editId = null;
+    let pollTimer = null;
+
+    function tryLogin() {
+      const pw = document.getElementById('pw-input').value;
+      const err = document.getElementById('pw-err');
+
+      if (pw === ADMIN_PASS) {
+        isAdmin = true;
+        startApp();
+      } else {
+        err.style.display = 'block';
+        document.getElementById('pw-input').classList.add('err');
+
+        setTimeout(() => {
+          err.style.display = 'none';
+          document.getElementById('pw-input').classList.remove('err');
+        }, 1500);
+      }
+    }
+
+    function enterAsWorker() {
+      isAdmin = false;
+      startApp();
+    }
+
+    function logout() {
+      clearInterval(pollTimer);
+      document.getElementById('app').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('pw-input').value = '';
+    }
+
+    function startApp() {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+
+      const badge = document.getElementById('role-badge');
+      badge.className = 'role-badge ' + (isAdmin ? 'admin' : 'worker');
+      badge.innerHTML = isAdmin ? '🔒 АДМІН' : '👁 ПЕРЕГЛЯД';
+
+      document.getElementById('btn-add').style.display = isAdmin ? 'flex' : 'none';
+
+      loadData();
+      pollTimer = setInterval(loadData, POLL_MS);
+    }
+
+    function parseCSV(text) {
+      const clean = text.trim();
+      if (!clean) return [];
+
+      const lines = clean.split('\n');
+      if (lines.length < 2) return [];
+
+      const headers = parseLine(lines[0]);
+
+      return lines.slice(1).map(line => {
+        const vals = parseLine(line);
+        const obj = {};
+
+        headers.forEach((h, i) => {
+          obj[h.trim()] = (vals[i] || '').trim();
+        });
+
+        return obj;
+      }).filter(r => Object.values(r).some(v => v));
+    }
+
+    function parseLine(line) {
+      const result = [];
+      let cur = '';
+      let inQ = false;
+
+      for (let i = 0; i < line.length; i++) {
+        const c = line[i];
+
+        if (c === '"') {
+          if (inQ && line[i + 1] === '"') {
+            cur += '"';
+            i++;
+          } else {
+            inQ = !inQ;
+          }
+        } else if (c === ',' && !inQ) {
+          result.push(cur);
+          cur = '';
+        } else {
+          cur += c;
+        }
+      }
+
+      result.push(cur);
+      return result;
+    }
+
+    async function loadData() {
+      try {
+        const [rA, rC, rS] = await Promise.all([
+          fetch(csvAcc + '&t=' + Date.now()),
+          fetch(csvCdk + '&t=' + Date.now()),
+          fetch(csvStats + '&t=' + Date.now())
+        ]);
+
+        accounts = parseCSV(await rA.text()).map((a, i) => ({
+          ...a,
+          _id: i
+        }));
+
+        cdks = parseCSV(await rC.text()).map((c, i) => ({
+          ...c,
+          _id: i,
+          _used: (c.used || '').toLowerCase() === 'true' || c.used === '1',
+          category: c.category || 'Spotify'
+        }));
+
+        statsRows = parseCSV(await rS.text());
+
+        updateStats();
+        render();
+        renderCategoryStats();
+
+        document.getElementById('sync-info').textContent =
+          '↻ ' + new Date().toLocaleTimeString('uk-UA') + ' · авто-оновлення 15с';
+      } catch (e) {
+        document.getElementById('sync-info').textContent =
+          '⚠ Помилка завантаження — перевір налаштування таблиці';
+      }
+    }
+
+    function getUsedTotal(category) {
+      const row = statsRows.find(s => s.category === category);
+      return Number(row?.used_count || 0);
+    }
+
+    function updateStats() {
+      document.getElementById('s-acc').textContent = accounts.length;
+
+      const active = cdks.filter(c => !c._used).length;
+      document.getElementById('s-active').textContent = active;
+
+      const usedTotal = CATEGORIES.reduce((sum, c) => sum + getUsedTotal(c), 0);
+      document.getElementById('s-used-total').textContent = usedTotal;
+    }
+
+    function renderCategoryStats() {
+      const wrap = document.getElementById('cat-stats');
+
+      wrap.innerHTML = CATEGORIES.map(cat => {
+        const active = cdks.filter(c => !c._used && c.category === cat).length;
+        const usedTotal = getUsedTotal(cat);
+
+        return `
+          <div class="cat-card ${filterCategory === cat ? 'active' : ''}" onclick="setCategory('${cat}')">
+            <div class="cat-name">${catIcon(cat)} ${cat}</div>
+
+            <div class="cat-row">
+              <div>
+                <div>Активні</div>
+                <div class="cat-num" style="color:#4ade80">${active}</div>
+              </div>
+
+              <div>
+                <div>Використані</div>
+                <div class="cat-num" style="color:#f87171">${usedTotal}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function setCategory(cat) {
+      filterCategory = filterCategory === cat ? 'all' : cat;
+      currentTab = 'cdks';
+      switchTab('cdks', true);
+      render();
+      renderCategoryStats();
+    }
+
+    function switchTab(tab, keepCategory = false) {
+      currentTab = tab;
+
+      document.getElementById('tab-accounts').className =
+        'tab-btn' + (tab === 'accounts' ? ' active' : '');
+
+      document.getElementById('tab-cdks').className =
+        'tab-btn' + (tab === 'cdks' ? ' active' : '');
+
+      document.getElementById('search').value = '';
+      filterType = 'all';
+      filterUsed = 'all';
+
+      if (!keepCategory && tab !== 'cdks') {
+        filterCategory = 'all';
+      }
+
+      render();
+      renderCategoryStats();
+    }
+
+    function renderChips() {
+      const c = document.getElementById('chips');
+
+      if (currentTab === 'accounts') {
+        c.innerHTML = ['all', 'xbox', 'itunes'].map(v => `
+          <button class="chip${filterType === v ? ' active' : ''}" onclick="filterType='${v}';render()">
+            ${v === 'all' ? 'Всі' : v === 'xbox' ? 'Xbox' : 'iTunes'}
+          </button>
+        `).join('');
+      } else {
+        const usedChips = ['all', 'active', 'used'].map(v => `
+          <button class="chip${filterUsed === v ? ' active' : ''}" onclick="filterUsed='${v}';render()">
+            ${v === 'all' ? 'Всі' : v === 'active' ? '✓ Активні' : '✗ Використані'}
+          </button>
+        `).join('');
+
+        const categoryChips = ['all', ...CATEGORIES].map(v => `
+          <button class="chip${filterCategory === v ? ' active' : ''}" onclick="filterCategory='${v}';render();renderCategoryStats()">
+            ${v === 'all' ? 'Усі категорії' : catIcon(v) + ' ' + v}
+          </button>
+        `).join('');
+
+        c.innerHTML = usedChips + categoryChips;
+      }
+    }
+
+    function render() {
+      renderChips();
+
+      const q = document.getElementById('search').value.toLowerCase();
+      const el = document.getElementById('cards');
+
+      if (currentTab === 'accounts') {
+        let list = accounts.filter(a => {
+          if (filterType !== 'all' && (a.type || '').toLowerCase() !== filterType) return false;
+          if (!q) return true;
+
+          return (
+            (a.login || '') +
+            (a.note || '') +
+            (a.rate || '') +
+            (a.type || '')
+          ).toLowerCase().includes(q);
+        });
+
+        el.innerHTML = list.length
+          ? list.map(accCard).join('')
+          : '<div class="empty">Акаунтів не знайдено</div>';
+      } else {
+        let list = cdks.filter(c => {
+          if (filterUsed === 'active' && c._used) return false;
+          if (filterUsed === 'used' && !c._used) return false;
+          if (filterCategory !== 'all' && c.category !== filterCategory) return false;
+          if (!q) return true;
+
+          return (
+            (c.label || '') +
+            (c.code || '') +
+            (c.note || '') +
+            (c.category || '')
+          ).toLowerCase().includes(q);
+        });
+
+        el.innerHTML = list.length
+          ? list.map(cdkCard).join('')
+          : '<div class="empty">Кодів не знайдено</div>';
+      }
+    }
+
+    function accCard(a) {
+      const xb = (a.type || '').toLowerCase() === 'xbox';
+
+      const adminBtns = isAdmin ? `
+        <div class="card-actions">
+          <button class="btn-icon btn-edit" onclick="openEditAcc(${a._id})">${svgEdit}</button>
+          <button class="btn-icon btn-del" onclick="alert('Видалення акаунтів поки через таблицю')">${svgTrash}</button>
+        </div>
+      ` : '';
+
+      const fields = [
+        a.login ? `<div class="field-row"><span class="field-key">LOGIN</span><span class="field-val">${esc(a.login)}</span>${copyBtn(a.login)}</div>` : '',
+        a.password ? `<div class="field-row"><span class="field-key">PASS</span><span class="field-val pass" id="pv-${a._id}">••••••••••••</span><button class="btn-eye" onclick="toggleAccPass(${a._id},'${esc(a.password)}')">👁</button>${copyBtn(a.password)}</div>` : '',
+        a.link ? `<div class="field-row"><span class="field-key">LINK</span><a href="${esc(a.link)}" target="_blank" class="field-val">${esc(a.link)}</a>${copyBtn(a.link)}</div>` : '',
+        a.phone_code ? `<div class="field-row"><span class="field-key">TEL</span><span class="field-val">${esc(a.phone_code)}</span>${copyBtn(a.phone_code)}</div>` : ''
+      ].filter(Boolean).join('');
+
+      return `
+        <div class="acc-card">
+          <div class="card-head">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <span class="type-badge ${xb ? 'type-xbox' : 'type-itunes'}">${xb ? '🎮 Xbox' : '🍎 iTunes'}</span>
+              ${a.rate ? `<span class="price-badge">💰 ${esc(a.rate)}</span>` : ''}
+            </div>
+
+            ${adminBtns}
+          </div>
+
+          <div class="card-fields">
+            ${fields}
+            ${a.note ? `<div class="field-note">${esc(a.note)}</div>` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleAccPass(id, pw) {
+      const el = document.getElementById('pv-' + id);
+      if (!el) return;
+
+      if (el.classList.contains('show')) {
+        el.textContent = '••••••••••••';
+        el.classList.remove('show');
+      } else {
+        el.textContent = pw;
+        el.classList.add('show');
+      }
+    }
+
+    function cdkCard(c) {
+      const adminBtns = isAdmin ? `
+        <button class="btn-icon btn-edit" onclick="openEditCdk(${c._id})">${svgEdit}</button>
+        <button class="btn-icon btn-del" onclick="deleteCdk(${c._id})">${svgTrash}</button>
+      ` : '';
+
+      const workerToggle = `
+        <button class="btn-toggle ${c._used ? 'used' : 'active'}" onclick="workerToggleCdk(${c._id})">
+          ${c._used ? '✗ Використано' : '✓ Активний'}
+        </button>
+      `;
+
+      const codeDisplay = c._used
+        ? `
+          <span class="cdk-code masked" id="cc-${c._id}">${'•'.repeat((c.code || '').length)}</span>
+          <button class="btn-reveal" onclick="revealCdk(${c._id},'${esc(c.code)}')">👁</button>
+        `
+        : `
+          <span class="cdk-code active">${esc(c.code)}</span>
+          ${copyBtn(c.code)}
+        `;
+
+      return `
+        <div class="cdk-card ${c._used ? 'used' : 'active'}">
+          <div class="cdk-head">
+            <div class="cdk-title">
+              🔑 ${esc(c.label || 'CDK Код')}
+              <span class="category-badge">${catIcon(c.category)} ${esc(c.category || 'Spotify')}</span>
+            </div>
+
+            <div class="cdk-controls">
+              ${workerToggle}
+              ${adminBtns}
+            </div>
+          </div>
+
+          <div class="cdk-code-box">
+            ${codeDisplay}
+          </div>
+
+          ${c.note ? `<div class="field-note" style="margin-top:10px">${esc(c.note)}</div>` : ''}
+        </div>
+      `;
+    }
+
+    function revealCdk(id, code) {
+      const el = document.getElementById('cc-' + id);
+      if (!el) return;
+
+      el.textContent = el.textContent.includes('•')
+        ? code
+        : '•'.repeat(code.length);
+    }
+
+    async function postApi(payload) {
+      await fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify(payload)
+      });
+    }
+
+    async function workerToggleCdk(id) {
+      const c = cdks[id];
+      if (!c) return;
+
+      const newStatus = !c._used;
+
+      await postApi({
+        type: 'cdk',
+        action: 'toggle',
+        row: id,
+        used: newStatus ? 'TRUE' : 'FALSE'
+      });
+
+      setTimeout(loadData, 1000);
+    }
+
+    async function deleteCdk(id) {
+      if (!confirm('Видалити цей CDK?')) return;
+
+      await postApi({
+        type: 'cdk',
+        action: 'delete',
+        row: id
+      });
+
+      setTimeout(loadData, 1000);
+    }
+
+    let copyTimers = {};
+
+    function copyText(text, btnEl) {
+      navigator.clipboard.writeText(text).then(() => {
+        btnEl.innerHTML = '✓ OK';
+        btnEl.classList.add('ok');
+
+        clearTimeout(copyTimers[text]);
+
+        copyTimers[text] = setTimeout(() => {
+          btnEl.innerHTML = '📋 Копія';
+          btnEl.classList.remove('ok');
+        }, 1400);
+      });
+    }
+
+    function copyBtn(text) {
+      return `<button class="btn-copy" onclick="copyText('${esc(text)}',this)">📋 Копія</button>`;
+    }
+
+    function openAddModal() {
+      editId = null;
+
+      document.getElementById('modal-title').textContent =
+        currentTab === 'accounts' ? 'Новий акаунт' : 'Новий CDK';
+
+      document.getElementById('modal-body').innerHTML =
+        currentTab === 'accounts' ? accForm(null) : cdkForm(null);
+
+      document.getElementById('modal').style.display = 'flex';
+    }
+
+    function openEditAcc(id) {
+      editId = id;
+      document.getElementById('modal-title').textContent = 'Редагувати акаунт';
+      document.getElementById('modal-body').innerHTML = accForm(accounts[id]);
+      document.getElementById('modal').style.display = 'flex';
+    }
+
+    function openEditCdk(id) {
+      editId = id;
+      document.getElementById('modal-title').textContent = 'Редагувати CDK';
+      document.getElementById('modal-body').innerHTML = cdkForm(cdks[id]);
+      document.getElementById('modal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('modal').style.display = 'none';
+    }
+
+    function accForm(a) {
+      const t = a ? (a.type || 'xbox').toLowerCase() : 'xbox';
+
+      return `
+        <div>
+          <div class="form-field">
+            <label class="form-label">Тип</label>
+
+            <div class="type-btns">
+              <button class="type-btn${t === 'xbox' ? ' sel' : ''}" id="tb-xbox" onclick="selType('xbox')">🎮 Xbox</button>
+              <button class="type-btn${t === 'itunes' ? ' sel' : ''}" id="tb-itunes" onclick="selType('itunes')">🍎 iTunes</button>
+            </div>
+
+            <input type="hidden" id="f-type" value="${t}">
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Логін / Email</label>
+            <input class="form-input" id="f-login" value="${esc(a?.login || '')}">
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Пароль</label>
+
+            <div class="pass-field">
+              <input class="form-input" type="password" id="f-pass" value="${esc(a?.password || '')}">
+              <button class="pass-toggle" onclick="togglePw('f-pass',this)">👁</button>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Посилання</label>
+            <input class="form-input" id="f-link" value="${esc(a?.link || '')}">
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Телефон / 2FA</label>
+            <input class="form-input" id="f-phone" value="${esc(a?.phone_code || '')}">
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Ціна</label>
+            <input class="form-input" id="f-rate" value="${esc(a?.rate || '')}">
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Нотатка</label>
+            <textarea class="form-input" id="f-note">${esc(a?.note || '')}</textarea>
+          </div>
+
+          <div class="form-field" style="background:#f59e0b10;border:1px solid #f59e0b30;border-radius:10px;padding:12px;font-size:12px;color:#fbbf24">
+            💡 Акаунти поки додаються через копіювання рядка в Google Таблицю.
+          </div>
+
+          <div class="form-footer">
+            <button class="btn-cancel" onclick="closeModal()">Скасувати</button>
+            <button class="btn-primary" style="width:auto" onclick="saveAccForm()">Зберегти</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function cdkForm(c) {
+      const used = c ? c._used : false;
+      const cat = c?.category || (filterCategory !== 'all' ? filterCategory : 'Spotify');
+
+      return `
+        <div>
+          <div class="form-field">
+            <label class="form-label">Категорія</label>
+
+            <select class="form-input" id="f-category">
+              ${CATEGORIES.map(x => `
+                <option value="${x}" ${cat === x ? 'selected' : ''}>
+                  ${catIcon(x)} ${x}
+                </option>
+              `).join('')}
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Назва</label>
+            <input class="form-input" id="f-label" value="${esc(c?.label || '')}">
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">CDK Код</label>
+            <input class="form-input code-inp" id="f-code" value="${esc(c?.code || '')}" oninput="this.value=this.value.toUpperCase()">
+          </div>
+
+          <div class="status-row">
+            <span class="form-label" style="margin:0">Статус:</span>
+
+            <button class="btn-toggle ${used ? 'used' : 'active'}" id="f-status-btn" onclick="toggleFormStatus()">
+              ${used ? '✗ Використано' : '✓ Активний'}
+            </button>
+
+            <input type="hidden" id="f-status" value="${used}">
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Нотатка</label>
+            <textarea class="form-input" id="f-note">${esc(c?.note || '')}</textarea>
+          </div>
+
+          <div class="form-footer">
+            <button class="btn-cancel" onclick="closeModal()">Скасувати</button>
+            <button class="btn-primary" style="width:auto" onclick="saveCdkForm()">Зберегти</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function selType(t) {
+      document.getElementById('f-type').value = t;
+      document.getElementById('tb-xbox').className = 'type-btn' + (t === 'xbox' ? ' sel' : '');
+      document.getElementById('tb-itunes').className = 'type-btn' + (t === 'itunes' ? ' sel' : '');
+    }
+
+    function toggleFormStatus() {
+      const inp = document.getElementById('f-status');
+      const btn = document.getElementById('f-status-btn');
+      const now = inp.value === 'true';
+
+      inp.value = !now;
+      btn.className = 'btn-toggle ' + (!now ? 'used' : 'active');
+      btn.textContent = !now ? '✗ Використано' : '✓ Активний';
+    }
+
+    function saveAccForm() {
+      const data = {
+        type: document.getElementById('f-type').value,
+        login: document.getElementById('f-login').value,
+        password: document.getElementById('f-pass').value,
+        link: document.getElementById('f-link').value,
+        phone_code: document.getElementById('f-phone').value,
+        rate: document.getElementById('f-rate').value,
+        note: document.getElementById('f-note').value
+      };
+
+      prompt(
+        'Скопіюй рядок для таблиці Accounts (Ctrl+C):',
+        `${data.type}\t${data.login}\t${data.password}\t${data.link}\t${data.phone_code}\t${data.rate}\t${data.note}`
+      );
+
+      closeModal();
+    }
+
+    async function saveCdkForm() {
+      const isEdit = editId !== null;
+
+      await postApi({
+        type: 'cdk',
+        action: isEdit ? 'update' : 'add',
+        row: editId,
+        label: document.getElementById('f-label').value,
+        code: document.getElementById('f-code').value,
+        used: document.getElementById('f-status').value === 'true' ? 'TRUE' : 'FALSE',
+        note: document.getElementById('f-note').value,
+        category: document.getElementById('f-category').value
+      });
+
+      closeModal();
+      setTimeout(loadData, 1000);
+    }
+
+    function togglePw(id, btn) {
+      const inp = document.getElementById(id);
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+      btn.innerHTML = inp.type === 'password' ? '👁' : '🙈';
+    }
+
+    function catIcon(cat) {
+      if (cat === 'Spotify') return '🟢';
+      if (cat === 'Claude') return '🟠';
+      if (cat === 'ChatGPT') return '🌀';
+      if (cat === 'Grok') return '⚫';
+      return '🔑';
+    }
+
+    function esc(s) {
+      return String(s || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    const svgEdit = `
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+      </svg>
+    `;
+
+    const svgTrash = `
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+        <path d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+      </svg>
+    `;
+  </script>
 </body>
 </html>
