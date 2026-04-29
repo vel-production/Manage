@@ -1043,6 +1043,91 @@
     transform: translateX(0);
   }
 }   
+  .confirm-box {
+  position: relative;
+  text-align: center;
+  background: radial-gradient(circle at top, #1f2937, #0b1220 70%);
+  border: 1px solid #ffffff18;
+  border-radius: 26px;
+  padding: 34px 30px 28px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 30px 100px #000c;
+}
+
+.confirm-add {
+  border-color: #22c55e88;
+  box-shadow: 0 0 45px #22c55e35, 0 30px 100px #000c;
+}
+
+.confirm-danger {
+  border-color: #ef444488;
+  box-shadow: 0 0 45px #ef444435, 0 30px 100px #000c;
+}
+
+.confirm-x {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 24px;
+}
+
+.confirm-icon {
+  width: 74px;
+  height: 74px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 34px;
+  background: #ffffff10;
+  box-shadow: inset 0 0 24px #ffffff10;
+}
+
+.confirm-add .confirm-icon {
+  color: #4ade80;
+  border: 2px solid #22c55e;
+  box-shadow: 0 0 28px #22c55e66;
+}
+
+.confirm-danger .confirm-icon {
+  color: #f87171;
+  border: 2px solid #ef4444;
+  box-shadow: 0 0 28px #ef444466;
+}
+
+.confirm-title {
+  font-size: 26px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  color: #f8fafc;
+}
+
+.confirm-text {
+  color: #cbd5e1;
+  line-height: 1.55;
+  font-size: 16px;
+  margin-bottom: 26px;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+}
+
+.btn-confirm-add {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  border: none;
+  border-radius: 12px;
+  padding: 12px 22px;
+  color: white;
+  font-weight: 800;
+  font-size: 15px;
+}  
   </style>
 </head>
 <body>   
@@ -1193,19 +1278,29 @@
     let selected = new Set();
     let confirmResolve = null;
 
-function showConfirm(title, text) {
+function showConfirm(title, text, type = 'danger') {
   return new Promise(resolve => {
     confirmResolve = resolve;
 
+    const isAdd = type === 'add';
+
     document.getElementById('modal-title').textContent = '';
     document.getElementById('modal-body').innerHTML = `
-      <div class="confirm-box">
+      <div class="confirm-box ${isAdd ? 'confirm-add' : 'confirm-danger'}">
+        <button class="confirm-x" onclick="confirmNo()">✕</button>
+
+        <div class="confirm-icon">
+          ${isAdd ? '🔑' : '🗑'}
+        </div>
+
         <div class="confirm-title">${title}</div>
         <div class="confirm-text">${text}</div>
 
         <div class="confirm-actions">
           <button class="btn-cancel" onclick="confirmNo()">Скасувати</button>
-          <button class="btn-danger" onclick="confirmYes()">Підтвердити</button>
+          <button class="${isAdd ? 'btn-confirm-add' : 'btn-danger'}" onclick="confirmYes()">
+            ${isAdd ? '＋ Додати' : '🗑 Підтвердити'}
+          </button>
         </div>
       </div>
     `;
@@ -1347,11 +1442,12 @@ function confirmNo() {
         }));
 
         cdks = parseCSV(await rC.text()).map((c, i) => ({
-          ...c,
-          _id: i,
-          _used: (c.used || '').toLowerCase() === 'true' || c.used === '1',
-          category: c.category || 'Spotify'
-        }));
+  ...c,
+  _id: i,
+  _used: (c.used || '').toLowerCase() === 'true' || c.used === '1',
+  category: c.category || 'Spotify',
+  note: String(c.note || '').toLowerCase() === 'false' ? '' : (c.note || '')
+}));
 
         statsRows = parseCSV(await rS.text());
 
@@ -1677,7 +1773,9 @@ if (!ok) return;
             ${codeDisplay}
           </div>
 
-          ${c.note ? `<div class="field-note" style="margin-top:10px">${esc(c.note)}</div>` : ''}
+          ${c.note && String(c.note).toLowerCase() !== 'false'
+        ? `<div class="field-note" style="margin-top:10px">${esc(c.note)}</div>`
+          : ''}
         </div>
       `;
     }
@@ -1976,8 +2074,9 @@ if (!filteredCodes.length) {
 }
 
     const ok = await showConfirm(
-  'Перевір категорію',
-  `Ти додаєш ${filteredCodes.length} CDK у категорію: <b>${category}</b>. Продовжити?`
+  'Додати CDK коди?',
+  `Ти додаєш <b>${filteredCodes.length}</b> CDK у категорію <b>${category}</b>.<br>Продовжити?`,
+  'add'
 );
 
 if (!ok) return;
