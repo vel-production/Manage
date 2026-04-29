@@ -1328,63 +1328,6 @@ function render() {
       `;
     }
 
-    function renderActions() {
-  const el = document.getElementById('actions-bar');
-
-  if (!el || !isAdmin || currentTab !== 'cdks') {
-    if (el) el.innerHTML = '';
-    return;
-  }
-
-  el.innerHTML = `
-    <button class="btn-secondary" onclick="deleteSelectedCdks()">🗑 Видалити вибрані</button>
-    <button class="btn-danger" onclick="deleteFilteredCdks()">🗑 Видалити цей список</button>
-  `;
-}
-
-function toggleSelect(id) {
-  if (selected.has(id)) selected.delete(id);
-  else selected.add(id);
-  render();
-}
-
-async function deleteSelectedCdks() {
-  if (!selected.size) return alert('Нічого не вибрано');
-
-  if (!confirm(`Видалити ${selected.size} вибраних CDK?`)) return;
-
-  await postApi({
-    type: 'cdk',
-    action: 'deleteRows',
-    rows: Array.from(selected)
-  });
-
-  selected.clear();
-  setTimeout(loadData, 1000);
-}
-
-async function deleteFilteredCdks() {
-  const list = cdks.filter(c => {
-    if (filterUsed === 'active' && c._used) return false;
-    if (filterUsed === 'used' && !c._used) return false;
-    if (filterCategory !== 'all' && c.category !== filterCategory) return false;
-    return true;
-  });
-
-  if (!list.length) return alert('Немає що видаляти');
-
-  if (!confirm(`Видалити ${list.length} CDK з поточного списку?`)) return;
-
-  await postApi({
-    type: 'cdk',
-    action: 'deleteRows',
-    rows: list.map(x => x._id)
-  });
-
-  selected.clear();
-  setTimeout(loadData, 1000);
-}
-
     function toggleAccPass(id, pw) {
       const el = document.getElementById('pv-' + id);
       if (!el) return;
