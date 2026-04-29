@@ -1452,7 +1452,7 @@ function confirmNo() {
       <button class="chip chip-all${filterUsed === 'all' ? ' active' : ''}" onclick="filterUsed='all';render()">Всі</button>
       <button class="chip chip-active${filterUsed === 'active' ? ' active' : ''}" onclick="filterUsed='active';render()">✓ Активні</button>
       <button class="chip chip-used${filterUsed === 'used' ? ' active' : ''}" onclick="filterUsed='used';render()">✕ Використані</button>
-      <button class="chip chip-today" onclick="alert('Фільтр за сьогодні додамо наступним кроком')">▣ Використані сьогодні</button>
+      <button class="chip chip-today" onclick="toast('Фільтр за сьогодні додамо наступним кроком', 'ok')">▣ Використані сьогодні</button>
     `;
   }
 }
@@ -1614,8 +1614,8 @@ async function deleteFilteredCdks() {
   });
 
   if (!list.length) {
-    alert('Немає що видаляти');
-    return;
+    toast('Немає що видаляти', 'err');
+  return;
   }
 
   const ok = await showConfirm(
@@ -1716,16 +1716,22 @@ if (!ok) return;
     }
 
     async function deleteCdk(id) {
-      if (!confirm('Видалити цей CDK?')) return;
+  const ok = await showConfirm(
+    'Видалити CDK?',
+    'Цей код буде видалено. Перед цим буде створена резервна копія.'
+  );
 
-      await postApi({
-        type: 'cdk',
-        action: 'delete',
-        row: id
-      });
+  if (!ok) return;
 
-      setTimeout(loadData, 1000);
-    }
+  await postApi({
+    type: 'cdk',
+    action: 'delete',
+    row: id
+  });
+
+  toast('CDK видалено', 'ok');
+  setTimeout(loadData, 1000);
+}
 
     let copyTimers = {};
 
@@ -1986,6 +1992,8 @@ if (!ok) return;
       codes: filteredCodes
     });
 
+    toast('CDK додано', 'ok');
+
   } else {
     await postApi({
       type: 'cdk',
@@ -1998,6 +2006,8 @@ if (!ok) return;
       category
     });
   }
+
+  toast('CDK оновлено', 'ok');
 
   closeModal();
   setTimeout(loadData, 1000);
