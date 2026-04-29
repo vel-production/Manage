@@ -1288,6 +1288,118 @@
   font-size: 28px;
   font-weight: 800;
 }  
+  .account-card-premium {
+  background: linear-gradient(145deg, #07111f, #090f1c);
+  border: 1px solid #ffffff18;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: inset 0 0 30px #ffffff05;
+}
+
+.account-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 18px 20px;
+  border-bottom: 1px solid #ffffff12;
+}
+
+.account-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.account-brand-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  object-fit: contain;
+}
+
+.account-brand-name {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.account-rate {
+  background: #f59e0b22;
+  border: 1px solid #f59e0b33;
+  color: #facc15;
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-weight: 800;
+}
+
+.account-balance-box {
+  margin-left: auto;
+  margin-right: 16px;
+  color: #22c55e;
+  font-weight: 800;
+  font-size: 24px;
+}
+
+.account-balance-box small {
+  display: block;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.account-card-body {
+  padding: 14px 20px 18px;
+}
+
+.account-line {
+  display: grid;
+  grid-template-columns: 90px 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 13px 0;
+  border-bottom: 1px solid #ffffff10;
+}
+
+.account-line:last-child {
+  border-bottom: none;
+}
+
+.account-key {
+  color: #94a3b8;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.account-value {
+  color: #f8fafc;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.btn-copy {
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid #ffffff20;
+  background: linear-gradient(135deg, #111827, #0b1220);
+  color: #e2e8f0;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.btn-copy:hover {
+  border-color: #6366f180;
+  box-shadow: 0 0 14px #6366f155;
+}
+
+.btn-copy.ok {
+  border-color: #22c55e80;
+  background: #22c55e20;
+  color: #86efac;
+}  
   </style>
 </head>
 <body>   
@@ -1902,40 +2014,75 @@ function render() {
     }
 
     function accCard(a) {
-      const xb = (a.type || '').toLowerCase() === 'xbox';
+  const type = String(a.type || '').toLowerCase();
+  const isXbox = type === 'xbox';
+  const name = isXbox ? 'Xbox' : 'App Store';
+  const icon = isXbox ? 'Xbox.png' : 'Appstore.png';
 
-      const adminBtns = isAdmin ? `
-  <div class="card-actions">
-    <button class="btn-icon btn-edit" onclick="openEditAcc(${a._id})">${svgEdit}</button>
-    <button class="btn-icon btn-del" onclick="alert('Видалення акаунтів поки через таблицю')">${svgTrash}</button>
-  </div>
-` : '';
+  const rows = [
+    a.login ? ['LOGIN', a.login, true] : null,
+    a.password ? ['PASS', '••••••••••••', true, a.password, a._id] : null,
+    a.link ? ['LINK', a.link, true] : null,
+    a.twofa ? ['2FA', a.twofa, true] : null,
+    a.note ? ['NOTE', a.note, false] : null
+  ].filter(Boolean);
 
-      const fields = [
-        a.login ? `<div class="field-row"><span class="field-key">LOGIN</span><span class="field-val">${esc(a.login)}</span>${copyBtn(a.login)}</div>` : '',
-        a.password ? `<div class="field-row"><span class="field-key">PASS</span><span class="field-val pass" id="pv-${a._id}">••••••••••••</span><button class="btn-eye" onclick="toggleAccPass(${a._id},'${esc(a.password)}')">👁</button>${copyBtn(a.password)}</div>` : '',
-        a.link ? `<div class="field-row"><span class="field-key">LINK</span><a href="${esc(a.link)}" target="_blank" class="field-val">${esc(a.link)}</a>${copyBtn(a.link)}</div>` : '',
-        a.phone_code ? `<div class="field-row"><span class="field-key">TEL</span><span class="field-val">${esc(a.phone_code)}</span>${copyBtn(a.phone_code)}</div>` : ''
-      ].filter(Boolean).join('');
+  const lines = rows.map(r => {
+    const [key, shown, canCopy, realValue, id] = r;
 
+    if (key === 'PASS') {
       return `
-        <div class="acc-card">
-          <div class="card-head">
-            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-              <span class="type-badge ${xb ? 'type-xbox' : 'type-itunes'}">${xb ? '🎮 Xbox' : '🍎 iTunes'}</span>
-              ${a.rate ? `<span class="price-badge">💰 ${esc(a.rate)}</span>` : ''}
-            </div>
-
-            ${adminBtns}
-          </div>
-
-          <div class="card-fields">
-            ${fields}
-            ${a.note ? `<div class="field-note">${esc(a.note)}</div>` : ''}
+        <div class="account-line">
+          <div class="account-key">${key}</div>
+          <div class="account-value" id="pv-${id}">${shown}</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn-icon btn-edit" onclick="toggleAccPass(${id},'${esc(realValue)}')">👁</button>
+            ${copyBtn(realValue)}
           </div>
         </div>
       `;
     }
+
+    return `
+      <div class="account-line">
+        <div class="account-key">${key}</div>
+        <div class="account-value">${esc(shown)}</div>
+        <div>${canCopy ? copyBtn(shown) : ''}</div>
+      </div>
+    `;
+  }).join('');
+
+  const adminBtns = isAdmin ? `
+    <button class="btn-icon btn-edit" onclick="openEditAcc(${a._id})">${svgEdit}</button>
+    <button class="btn-icon btn-del" onclick="alert('Видалення акаунтів поки через таблицю')">${svgTrash}</button>
+  ` : '';
+
+  return `
+    <div class="account-card-premium">
+      <div class="account-card-top">
+        <div class="account-brand">
+          <img src="${icon}" class="account-brand-icon" alt="${name}">
+          <div class="account-brand-name" style="color:${isXbox ? '#4ade80' : '#22d3ee'}">${name}</div>
+        </div>
+
+        ${a.rate ? `<div class="account-rate">💰 ${esc(a.rate)}</div>` : ''}
+
+        ${a.balance ? `
+          <div class="account-balance-box">
+            <small>Баланс</small>
+            $${esc(a.balance)}
+          </div>
+        ` : ''}
+
+        <div class="card-actions">${adminBtns}</div>
+      </div>
+
+      <div class="account-card-body">
+        ${lines}
+      </div>
+    </div>
+  `;
+}
 
     function toggleAccPass(id, pw) {
       const el = document.getElementById('pv-' + id);
@@ -2169,8 +2316,16 @@ if (!ok) return;
     }
 
     function copyBtn(text) {
-      return `<button class="btn-copy" onclick="copyText('${esc(text)}',this)">▣ Копіювати</button>`;
-    }
+  return `
+    <button class="btn-copy" onclick="copyText('${esc(text)}',this)">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+      </svg>
+      Копіювати
+    </button>
+  `;
+}
 
     function openAddModal() {
   editId = null;
