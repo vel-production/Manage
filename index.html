@@ -2135,43 +2135,6 @@ if (!ok) return;
 }
     function accIcon(type) {
   const t = String(type || '').toLowerCase();
-
-  if (t === 'xbox') {
-    return `<img src="Xbox.png" class="account-stat-icon account-icon" alt="Xbox">`;
-  }
-
-  return `<img src="Appstore.png" class="account-stat-icon account-icon" alt="App Store">`;
-}
-
-  if (t === 'xbox') {
-    return `<div style="
-      width:52px;
-      height:52px;
-      border-radius:16px;
-      background:radial-gradient(circle at 30% 25%, #7cff7c, #16a34a 65%, #052e16);
-      display:grid;
-      place-items:center;
-      color:white;
-      font-size:30px;
-      font-weight:900;
-      box-shadow:0 0 22px #22c55e88;
-      flex-shrink:0;
-    ">X</div>`;
-  }
-
-  return `<div style="
-    width:52px;
-    height:52px;
-    border-radius:16px;
-    background:linear-gradient(135deg, #38bdf8, #2563eb, #7c3aed);
-    display:grid;
-    place-items:center;
-    color:white;
-    font-size:30px;
-    font-weight:900;
-    box-shadow:0 0 22px #38bdf888;
-    flex-shrink:0;
-  ">A</div>`;
 }
 
     function accountTypeChoice() {
@@ -2404,16 +2367,6 @@ function cdkForm(c) {
   toast(isEdit ? 'Акаунт оновлено' : 'Акаунт додано', 'ok');
   closeModal();
   setTimeout(loadData, 1000);
-}
-    
-    
-  const t = String(type || '').toLowerCase();
-
-  if (t === 'xbox') {
-    return `<img src="Xbox.png" class="account-stat-icon" alt="Xbox">`;
-  }
-
-  return `<img src="Appstore.png" class="account-stat-icon" alt="App Store">`;
 }
 
     async function saveCdkForm() {
