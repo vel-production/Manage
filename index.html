@@ -1280,7 +1280,7 @@
 
   <script>
     const SHEET_ID = '1-yF9f9LepfGBpg1fyhewTcgT7oePscPEScD9v-8Ggn4';
-    const API_URL = 'https://script.google.com/macros/s/AKfycbx6qB5AHsaK0ewSrmaU52oUKxFprtTAYX_VMhCEYzfRnILdK0UtzVZNkCaVGefjxSRL4Q/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyqOQMi2TsM0etBULK_utk3cZOPX2ST_g0XJuntZTjOu7dikFpfdXP2jxkfqx5lM22k/exec';
     const POLL_MS = 15000;
 
     const CATEGORIES = ['Spotify', 'Claude', 'ChatGPT', 'Grok'];
@@ -1533,9 +1533,18 @@ async function enterAsWorker() {
     }
 
     function getUsedTotal(category) {
-      const row = statsRows.find(s => s.category === category);
-      return Number(row?.used_count || 0);
-    }
+  return statsRows
+    .filter(s => s.category === category)
+    .reduce((sum, s) => sum + Number(s.used_count || 0), 0);
+}
+
+function getUsedToday(category) {
+  const today = new Date().toISOString().slice(0, 10);
+
+  return statsRows
+    .filter(s => s.date === today && s.category === category)
+    .reduce((sum, s) => sum + Number(s.used_count || 0), 0);
+}
 
     function updateStats() {
       document.getElementById('s-acc').textContent = accounts.length;
@@ -1553,23 +1562,28 @@ async function enterAsWorker() {
       wrap.innerHTML = CATEGORIES.map(cat => {
         const active = cdks.filter(c => !c._used && c.category === cat).length;
         const usedTotal = getUsedTotal(cat);
+        const usedToday = getUsedToday(cat);
 
         return `
           <div class="cat-card ${filterCategory === cat ? 'active' : ''}" onclick="setCategory('${cat}')">
             <div class="cat-name">${catIcon(cat)} ${cat}</div>
 
             <div class="cat-row">
-              <div>
-                <div>Активні</div>
-                <div class="cat-num" style="color:#4ade80">${active}</div>
-              </div>
+  <div>
+    <div>Активні</div>
+    <div class="cat-num" style="color:#4ade80">${active}</div>
+  </div>
 
-              <div>
-                <div>Використані</div>
-                <div class="cat-num" style="color:#f87171">${usedTotal}</div>
-              </div>
-            </div>
-          </div>
+  <div>
+    <div>Сьогодні</div>
+    <div class="cat-num" style="color:#facc15">${usedToday}</div>
+  </div>
+
+  <div>
+    <div>Всього</div>
+    <div class="cat-num" style="color:#f87171">${usedTotal}</div>
+  </div>
+</div>
         `;
       }).join('');
     }
