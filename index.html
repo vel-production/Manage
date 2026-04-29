@@ -824,6 +824,22 @@
         align-items: stretch;
       }
     }
+    .cat-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  object-fit: contain;
+  vertical-align: middle;
+  margin-right: 10px;
+  filter: drop-shadow(0 0 10px #ffffff22);
+}
+
+.cat-icon.spotify { filter: drop-shadow(0 0 14px #22c55e88); }
+.cat-icon.claude { filter: drop-shadow(0 0 14px #fb7a4388); }
+.cat-icon.chatgpt { filter: drop-shadow(0 0 14px #10b98188); }
+.cat-icon.grok {
+  filter: invert(1) brightness(1.7) drop-shadow(0 0 14px #8b5cf688);
+}
   </style>
 </head>
 
@@ -1590,16 +1606,16 @@ function render() {
 
     function catIcon(cat) {
   const files = {
-    Spotify: 'spotify.png',
-    Claude: 'claude.png',
-    ChatGPT: 'chatgpt.png',
-    Grok: 'grok.png'
+    Spotify: ['spotify.png', 'spotify'],
+    Claude: ['claude.png', 'claude'],
+    ChatGPT: ['chatgpt.png', 'chatgpt'],
+    Grok: ['grok.png', 'grok']
   };
 
-  const file = files[cat];
-  if (!file) return '🔑';
+  const item = files[cat];
+  if (!item) return '🔑';
 
-  return `<img class="cat-img" src="./${file}" alt="${cat}" onerror="this.replaceWith(document.createTextNode('🔑'))">`;
+  return `<img src="${item[0]}" class="cat-icon ${item[1]}" alt="${cat}">`;
 }
 
     function esc(s) {
