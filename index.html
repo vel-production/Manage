@@ -1401,6 +1401,32 @@
   background: #22c55e20;
   color: #86efac;
 }  
+ .brand-title {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  background: linear-gradient(
+    90deg,
+    #fff7c2,
+    #facc15,
+    #fb923c,
+    #f472b6,
+    #ef4444,
+    #fff7c2
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  animation: brandShine 4s ease-in-out infinite;
+  text-shadow: 0 0 22px #f59e0b55;
+}
+
+@keyframes brandShine {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}   
   </style>
 </head>
 <body>   
@@ -1411,7 +1437,7 @@
         <img src="avatar.png" alt="PixelDrop avatar" />
       </div>
 
-      <h2>PIXELDROP VAULT</h2>
+      <h2 class="brand-title">PixelDrop Vault</h2>
       <p>Xbox · App Store · CDK</p>
 
       <div class="login-section">
