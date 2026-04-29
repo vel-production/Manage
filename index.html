@@ -8,6 +8,27 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
   <style>
+    .worker-login {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.worker-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 11px 12px;
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+}
+
+.worker-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px #6366f122;
+}
     :root {
       --bg: #07090f;
       --surface: #0d1117;
@@ -1166,9 +1187,13 @@
         </button>
       </div>
 
-      <button class="btn-worker" onclick="enterAsWorker()">
-        Переглянути без пароля
-      </button>
+      <div class="worker-login">
+  <input class="worker-input" id="worker-name" placeholder="Нік працівника">
+  <input class="worker-input" id="worker-pass" type="password" placeholder="Пароль працівника">
+  <button class="btn-worker" onclick="enterAsWorker()">
+    Увійти як працівник
+  </button>
+    </div>
     </div>
   </div>
 
@@ -1372,25 +1397,27 @@ async function tryLogin() {
   }
 }
 
-async function enterAsWorker() {
-  const name = prompt("Введи свій нік:");
-  if (!name) return;
+function enterAsWorker() {
+  const name = document.getElementById('worker-name').value.trim();
+  const pass = document.getElementById('worker-pass').value.trim();
 
-  const pass = prompt("Введи пароль працівника:");
-  if (!pass) return;
-
-  const res = await authRequest(name, pass);
-
-  if (res.status === "ok") {
-    localStorage.setItem("managerRole", "worker");
-    localStorage.setItem("workerName", name);
-
-    currentUser = name;
-    isAdmin = false;
-    startApp();
-  } else {
-    toast("Невірний пароль працівника", "err");
+  if (!name) {
+    toast('Введи нік працівника', 'err');
+    return;
   }
+
+  if (pass !== WORKER_PASS) {
+    toast('Невірний пароль працівника', 'err');
+    return;
+  }
+
+  localStorage.setItem('managerRole', 'worker');
+  localStorage.setItem('workerName', name);
+
+  isAdmin = false;
+  currentUser = name;
+
+  startApp();
 }
 
     function logout() {
