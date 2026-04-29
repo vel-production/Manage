@@ -944,6 +944,33 @@
 .btn-primary {
   background: linear-gradient(135deg, #5b5ff5, #7c3aed);
 } 
+  .confirm-box {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 18px;
+  padding: 24px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 24px 80px #000b;
+}
+
+.confirm-title {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.confirm-text {
+  color: #94a3b8;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}  
   </style>
 </head>
 
@@ -1092,6 +1119,38 @@
     let editId = null;
     let pollTimer = null;
     let selected = new Set();
+    let confirmResolve = null;
+
+function showConfirm(title, text) {
+  return new Promise(resolve => {
+    confirmResolve = resolve;
+
+    document.getElementById('modal-title').textContent = '';
+    document.getElementById('modal-body').innerHTML = `
+      <div class="confirm-box">
+        <div class="confirm-title">${title}</div>
+        <div class="confirm-text">${text}</div>
+
+        <div class="confirm-actions">
+          <button class="btn-cancel" onclick="confirmNo()">Скасувати</button>
+          <button class="btn-danger" onclick="confirmYes()">Підтвердити</button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('modal').style.display = 'flex';
+  });
+}
+
+function confirmYes() {
+  document.getElementById('modal').style.display = 'none';
+  if (confirmResolve) confirmResolve(true);
+}
+
+function confirmNo() {
+  document.getElementById('modal').style.display = 'none';
+  if (confirmResolve) confirmResolve(false);
+}
 
     function tryLogin() {
   const pw = document.getElementById('pw-input').value;
@@ -1415,11 +1474,22 @@ function render() {
   }
 
   el.innerHTML = `
-    <button class="btn-secondary" onclick="deleteSelectedCdks()">🗑 Видалити вибрані</button>
-    <button class="btn-danger" onclick="deleteFilteredCdks()">🗑 Видалити цей список</button>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%">
+      <button class="btn-secondary" onclick="deleteSelectedCdks()">
+        🗑 Видалити вибрані
+      </button>
+
+      <button class="btn-danger" onclick="deleteFilteredCdks()">
+        🗑 Видалити цей список
+      </button>
+
+      <div style="color:#94a3b8;font-weight:700;margin-left:auto">
+        Вибрано: ${selected.size}
+      </div>
+    </div>
   `;
 }
-
+    
 function toggleSelect(id) {
   if (selected.has(id)) selected.delete(id);
   else selected.add(id);
@@ -1432,7 +1502,12 @@ async function deleteSelectedCdks() {
     return;
   }
 
-  if (!confirm(`Видалити ${selected.size} вибраних CDK?`)) return;
+  const ok = await showConfirm(
+  'Видалити вибрані CDK?',
+  `Буде видалено: <b>${selected.size}</b> CDK. Перед цим буде створена резервна копія.`
+);
+
+if (!ok) return;
 
   await postApi({
     type: 'cdk',
@@ -1457,7 +1532,12 @@ async function deleteFilteredCdks() {
     return;
   }
 
-  if (!confirm(`Видалити ${list.length} CDK з поточного списку?`)) return;
+  const ok = await showConfirm(
+  'Видалити цей список?',
+  `Буде видалено: <b>${list.length}</b> CDK з поточного фільтру. Перед цим буде створена резервна копія.`
+);
+
+if (!ok) return;
 
   await postApi({
     type: 'cdk',
@@ -1783,10 +1863,27 @@ function cdkForm(c) {
       .match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/g)
       ?.map(x => x.trim().toUpperCase()) || [];
 
+       const uniqueCodes = [...new Set(codes)];
+const existingCodes = cdks.map(x => String(x.code || '').toUpperCase());
+
+const filteredCodes = uniqueCodes.filter(code => !existingCodes.includes(code));
+
+if (!filteredCodes.length) {
+  alert('Усі ці CDK вже є в таблиці');
+  return;
+}
+    
     if (!codes.length) {
       alert('Не знайшов CDK коди. Встав коди формату 67c72481-378f-49ae-a6b1-9cbb9236e280');
       return;
     }
+
+    const ok = await showConfirm(
+  'Перевір категорію',
+  `Ти додаєш ${filteredCodes.length} CDK у категорію: <b>${category}</b>. Продовжити?`
+);
+
+if (!ok) return;
 
     await postApi({
       type: 'cdk',
@@ -1795,7 +1892,7 @@ function cdkForm(c) {
       label: category,
       used,
       note,
-      codes
+      codes: filteredCodes
     });
 
   } else {
