@@ -1791,7 +1791,7 @@
           <input
             type="password"
             id="pw-input"
-            placeholder="Пароль адміна"
+            placeholder="Пароль Власника"
             onkeydown="if(event.key==='Enter')tryLogin()"
           />
 
@@ -2014,7 +2014,7 @@ async function tryLogin() {
     startApp();
   } else {
     document.getElementById("pw-err").style.display = "block";
-    toast("Невірний пароль адміна", "err");
+    toast("Невірний Пароль Власника", "err");
   }
 }
 
