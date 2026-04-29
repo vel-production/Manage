@@ -1860,16 +1860,26 @@ function cdkForm(c) {
     const raw = document.getElementById('f-bulk-codes').value;
 
     const codes = raw
-      .match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/g)
-      ?.map(x => x.trim().toUpperCase()) || [];
+  .match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/g)
+  ?.map(x => x.trim().toUpperCase()) || [];
 
-       const uniqueCodes = [...new Set(codes)];
+if (!codes.length) {
+  await showConfirm(
+    'CDK не знайдено',
+    'Встав коди формату <b>67c72481-378f-49ae-a6b1-9cbb9236e280</b>'
+  );
+  return;
+}
+
+const uniqueCodes = [...new Set(codes)];
 const existingCodes = cdks.map(x => String(x.code || '').toUpperCase());
-
 const filteredCodes = uniqueCodes.filter(code => !existingCodes.includes(code));
 
 if (!filteredCodes.length) {
-  alert('Усі ці CDK вже є в таблиці');
+  await showConfirm(
+    'Дублікати',
+    'Усі ці CDK вже є в таблиці. Нових кодів для додавання немає.'
+  );
   return;
 }
     
