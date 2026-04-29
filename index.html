@@ -759,6 +759,7 @@
       max-width: 500px;
       max-height: 90vh;
       overflow-y: auto;
+      overflow-x: hidden;
       box-shadow: 0 24px 80px #0009;
     }
 
@@ -1847,7 +1848,7 @@ wrap.innerHTML = `
   <div class="account-quick-card xbox" onclick="filterType='xbox';render();renderCategoryStats()">
     ${accIcon('xbox')}
     <div>
-      <div class="account-quick-title">Xbox акаунти</div>
+      <div class="account-quick-title">Xbox</div>
       <div class="account-quick-stats">
         <div>
           <div class="account-quick-label">Всього акаунтів</div>
@@ -1864,7 +1865,7 @@ wrap.innerHTML = `
   <div class="account-quick-card itunes" onclick="filterType='itunes';render();renderCategoryStats()">
     ${accIcon('itunes')}
     <div>
-      <div class="account-quick-title">App Store акаунти</div>
+      <div class="account-quick-title">App Store</div>
       <div class="account-quick-stats">
         <div>
           <div class="account-quick-label">Всього акаунтів</div>
@@ -2353,35 +2354,22 @@ if (!ok) return;
 
     function accountTypeChoice() {
   return `
-    <div class="account-choice-grid">
-      <div class="account-choice-card" onclick="openAccountForm('itunes')">
-        <div class="account-choice-head">
-          ${accIcon('itunes')}
-          <div>
-            <div class="account-choice-title">App Store Account</div>
-            <div class="account-choice-sub">Додати новий App Store акаунт</div>
-          </div>
-        </div>
-        <div style="color:#94a3b8;font-size:13px">
-          Email · Пароль · Посилання · Баланс · Курс · Нотатка
-        </div>
-      </div>
-
-      <div class="account-choice-card" onclick="openAccountForm('xbox')">
-        <div class="account-choice-head">
-          ${accIcon('xbox')}
-          <div>
-            <div class="account-choice-title">Xbox Account</div>
-            <div class="account-choice-sub">Додати новий Xbox акаунт</div>
-          </div>
-        </div>
-        <div style="color:#94a3b8;font-size:13px">
-          Email · Пароль · 2FA · Баланс · Курс · Нотатка
-        </div>
+  <div class="account-choice-grid">
+    <div class="account-choice-card" onclick="openAccountForm('itunes')">
+      <div class="account-choice-head">
+        ${accIcon('itunes')}
+        <div class="account-choice-title">App Store</div>
       </div>
     </div>
-  `;
-}
+
+    <div class="account-choice-card" onclick="openAccountForm('xbox')">
+      <div class="account-choice-head">
+        ${accIcon('xbox')}
+        <div class="account-choice-title">Xbox</div>
+      </div>
+    </div>
+  </div>
+`;
 
 function openAccountForm(type) {
   editId = null;
