@@ -1280,7 +1280,7 @@
 
   <script>
     const SHEET_ID = '1-yF9f9LepfGBpg1fyhewTcgT7oePscPEScD9v-8Ggn4';
-    const API_URL = 'https://script.google.com/macros/s/AKfycbxdIr67Q8NUjlQAzZdJT3shwtl51PlXGgT8SbDKVtC4B4Stvt-4z8NjL5VkS9oBL53B8A/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwogekvSX_EswccxXWDyqFn3n7Q3buVMPLenvTeYOmwj3j5FiBK2iZ_C__62y370fy_QQ/exec';
     const POLL_MS = 15000;
 
     const CATEGORIES = ['Spotify', 'Claude', 'ChatGPT', 'Grok'];
@@ -1536,16 +1536,36 @@ async function enterAsWorker() {
   return cdks.filter(c => c._used && c.category === category).length;
 }
     
+function getUsedTotal(category) {
+  return statsRows
+    .filter(s => s.category === category)
+    .reduce((sum, s) => sum + Number(s.used_count || 0), 0);
+}
+
 function getUsedToday(category) {
-  const today = new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const today =
+    now.getFullYear() + '-' +
+    String(now.getMonth() + 1).padStart(2, '0') + '-' +
+    String(now.getDate()).padStart(2, '0');
 
-  return cdks.filter(c => {
-    if (!c._used) return false;
-    if (c.category !== category) return false;
-    if (!c.used_at) return false;
+  return statsRows
+    .filter(s => normalizeDate(s.date) === today && s.category === category)
+    .reduce((sum, s) => sum + Number(s.used_count || 0), 0);
+}
 
-    return String(c.used_at).startsWith(today);
-  }).length;
+function normalizeDate(value) {
+  const v = String(value || '').trim();
+  if (!v) return '';
+
+  if (/^\d{4}-\d{2}-\d{2}/.test(v)) return v.slice(0, 10);
+
+  const m = v.match(/Date\((\d+),(\d+),(\d+)\)/);
+  if (m) {
+    return `${m[1]}-${String(Number(m[2]) + 1).padStart(2, '0')}-${String(Number(m[3])).padStart(2, '0')}`;
+  }
+
+  return v;
 }
 
     function updateStats() {
