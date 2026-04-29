@@ -1158,7 +1158,7 @@
       renderCategoryStats();
     }
 
-    function renderChips() {
+   function renderChips() {
   const c = document.getElementById('chips');
 
   if (currentTab === 'accounts') {
@@ -1175,22 +1175,6 @@
     `).join('');
   }
 }
-      } else {
-        const usedChips = ['all', 'active', 'used'].map(v => `
-          <button class="chip${filterUsed === v ? ' active' : ''}" onclick="filterUsed='${v}';render()">
-            ${v === 'all' ? 'Всі' : v === 'active' ? '✓ Активні' : '✗ Використані'}
-          </button>
-        `).join('');
-
-        const categoryChips = ['all', ...CATEGORIES].map(v => `
-          <button class="chip${filterCategory === v ? ' active' : ''}" onclick="filterCategory='${v}';render();renderCategoryStats()">
-            ${v === 'all' ? 'Усі категорії' : catIcon(v) + ' ' + v}
-          </button>
-        `).join('');
-
-        c.innerHTML = usedChips + categoryChips;
-      }
-    }
 
     function render() {
       renderChips();
