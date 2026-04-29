@@ -1682,6 +1682,29 @@
     grid-template-columns: 1fr;
   }
 }  
+  @keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stat-card,
+.cat-card,
+.account-quick-card,
+.acc-card,
+.cdk-card,
+.account-card-premium,
+.tabs,
+.toolbar,
+.chips,
+.actions-bar {
+  animation: slideUpFade .45s ease both;
+}  
   </style>
 </head>
 <body>   
