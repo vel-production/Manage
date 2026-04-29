@@ -962,34 +962,37 @@
     let pollTimer = null;
 
     function tryLogin() {
-      const pw = document.getElementById('pw-input').value;
-      const err = document.getElementById('pw-err');
+  const pw = document.getElementById('pw-input').value;
+  const err = document.getElementById('pw-err');
 
-      if (pw === ADMIN_PASS) {
-        isAdmin = true;
-        startApp();
-      } else {
-        err.style.display = 'block';
-        document.getElementById('pw-input').classList.add('err');
+  if (pw === ADMIN_PASS) {
+    localStorage.setItem('managerRole', 'admin');
+    isAdmin = true;
+    startApp();
+  } else {
+    err.style.display = 'block';
+    document.getElementById('pw-input').classList.add('err');
 
-        setTimeout(() => {
-          err.style.display = 'none';
-          document.getElementById('pw-input').classList.remove('err');
-        }, 1500);
-      }
-    }
+    setTimeout(() => {
+      err.style.display = 'none';
+      document.getElementById('pw-input').classList.remove('err');
+    }, 1500);
+  }
+}
 
     function enterAsWorker() {
+      localStorage.setItem('managerRole', 'worker');
       isAdmin = false;
       startApp();
     }
 
     function logout() {
-      clearInterval(pollTimer);
-      document.getElementById('app').style.display = 'none';
-      document.getElementById('login-screen').style.display = 'flex';
-      document.getElementById('pw-input').value = '';
-    }
+  localStorage.removeItem('managerRole');
+  clearInterval(pollTimer);
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('pw-input').value = '';
+}
 
     function startApp() {
       document.getElementById('login-screen').style.display = 'none';
@@ -1177,7 +1180,6 @@
 }
 
 function render() {
-    function render() {
       renderChips();
 
       const q = document.getElementById('search').value.toLowerCase();
@@ -1472,55 +1474,50 @@ function render() {
     }
 
     function cdkForm(c) {
-      const used = c ? c._used : false;
-      const cat = c?.category || (filterCategory !== 'all' ? filterCategory : 'Spotify');
+  const used = c ? c._used : false;
+  const cat = c?.category || (filterCategory !== 'all' ? filterCategory : 'Spotify');
 
-      return `
-        <div>
-          <div class="form-field">
-            <label class="form-label">Категорія</label>
+  return `
+    <div>
+      <div class="form-field">
+        <label class="form-label">Категорія</label>
 
-            <select class="form-input" id="f-category">
-              ${CATEGORIES.map(x => `
-                <option value="${x}" ${cat === x ? 'selected' : ''}>
-                  ${catIcon(x)} ${x}
-                </option>
-              `).join('')}
-            </select>
-          </div>
+        <select class="form-input" id="f-category">
+          ${CATEGORIES.map(x => `
+            <option value="${x}" ${cat === x ? 'selected' : ''}>
+              ${catIcon(x)} ${x}
+            </option>
+          `).join('')}
+        </select>
+      </div>
 
-          <div class="form-field">
-            <label class="form-label">Назва</label>
-            <input class="form-input" id="f-label" value="${esc(c?.label || '')}">
-          </div>
+      <div class="form-field">
+        <label class="form-label">CDK Код</label>
+        <input class="form-input code-inp" id="f-code" value="${esc(c?.code || '')}" oninput="this.value=this.value.toUpperCase()">
+      </div>
 
-          <div class="form-field">
-            <label class="form-label">CDK Код</label>
-            <input class="form-input code-inp" id="f-code" value="${esc(c?.code || '')}" oninput="this.value=this.value.toUpperCase()">
-          </div>
+      <div class="status-row">
+        <span class="form-label" style="margin:0">Статус:</span>
 
-          <div class="status-row">
-            <span class="form-label" style="margin:0">Статус:</span>
+        <button class="btn-toggle ${used ? 'used' : 'active'}" id="f-status-btn" onclick="toggleFormStatus()">
+          ${used ? '✗ Використано' : '✓ Активний'}
+        </button>
 
-            <button class="btn-toggle ${used ? 'used' : 'active'}" id="f-status-btn" onclick="toggleFormStatus()">
-              ${used ? '✗ Використано' : '✓ Активний'}
-            </button>
+        <input type="hidden" id="f-status" value="${used}">
+      </div>
 
-            <input type="hidden" id="f-status" value="${used}">
-          </div>
+      <div class="form-field">
+        <label class="form-label">Нотатка</label>
+        <textarea class="form-input" id="f-note">${esc(c?.note || '')}</textarea>
+      </div>
 
-          <div class="form-field">
-            <label class="form-label">Нотатка</label>
-            <textarea class="form-input" id="f-note">${esc(c?.note || '')}</textarea>
-          </div>
-
-          <div class="form-footer">
-            <button class="btn-cancel" onclick="closeModal()">Скасувати</button>
-            <button class="btn-primary" style="width:auto" onclick="saveCdkForm()">Зберегти</button>
-          </div>
-        </div>
-      `;
-    }
+      <div class="form-footer">
+        <button class="btn-cancel" onclick="closeModal()">Скасувати</button>
+        <button class="btn-primary" style="width:auto" onclick="saveCdkForm()">Зберегти</button>
+      </div>
+    </div>
+  `;
+}
 
     function selType(t) {
       document.getElementById('f-type').value = t;
@@ -1564,7 +1561,7 @@ function render() {
         type: 'cdk',
         action: isEdit ? 'update' : 'add',
         row: editId,
-        label: document.getElementById('f-label').value,
+        label: document.getElementById('f-category').value,
         code: document.getElementById('f-code').value,
         used: document.getElementById('f-status').value === 'true' ? 'TRUE' : 'FALSE',
         note: document.getElementById('f-note').value,
@@ -1582,12 +1579,19 @@ function render() {
     }
 
     function catIcon(cat) {
-      if (cat === 'Spotify') return '🟢';
-      if (cat === 'Claude') return '🟠';
-      if (cat === 'ChatGPT') return '🌀';
-      if (cat === 'Grok') return '⚫';
-      return '🔑';
-    }
+  const files = {
+    Spotify: 'spotify.png',
+    Claude: 'claude.png',
+    ChatGPT: 'chatgpt.png',
+    Grok: 'grok.png'
+  };
+
+  const file = files[cat];
+
+  if (!file) return '🔑';
+
+  return `<img src="${file}" style="width:18px;height:18px;border-radius:50%;vertical-align:middle;margin-right:6px">`;
+}
 
     function esc(s) {
       return String(s || '')
@@ -1612,6 +1616,19 @@ function render() {
         <path d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
       </svg>
     `;
+  window.addEventListener('load', () => {
+  const savedRole = localStorage.getItem('managerRole');
+
+  if (savedRole === 'admin') {
+    isAdmin = true;
+    startApp();
+  }
+
+  if (savedRole === 'worker') {
+    isAdmin = false;
+    startApp();
+  }
+});
   </script>
 </body>
 </html>
