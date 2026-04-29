@@ -1533,17 +1533,19 @@ async function enterAsWorker() {
     }
 
     function getUsedTotal(category) {
-  return statsRows
-    .filter(s => s.category === category)
-    .reduce((sum, s) => sum + Number(s.used_count || 0), 0);
+  return cdks.filter(c => c._used && c.category === category).length;
 }
-
+    
 function getUsedToday(category) {
   const today = new Date().toISOString().slice(0, 10);
 
-  return statsRows
-    .filter(s => s.date === today && s.category === category)
-    .reduce((sum, s) => sum + Number(s.used_count || 0), 0);
+  return cdks.filter(c => {
+    if (!c._used) return false;
+    if (c.category !== category) return false;
+    if (!c.used_at) return false;
+
+    return String(c.used_at).startsWith(today);
+  }).length;
 }
 
     function updateStats() {
@@ -1568,22 +1570,23 @@ function getUsedToday(category) {
           <div class="cat-card ${filterCategory === cat ? 'active' : ''}" onclick="setCategory('${cat}')">
             <div class="cat-name">${catIcon(cat)} ${cat}</div>
 
-            <div class="cat-row">
-  <div>
-    <div>Активні</div>
-    <div class="cat-num" style="color:#4ade80">${active}</div>
-  </div>
+              <div class="cat-row">
+              <div>
+                <div>Активні</div>
+                <div class="cat-num" style="color:#4ade80">${active}</div>
+              </div>
 
-  <div>
-    <div>Сьогодні</div>
-    <div class="cat-num" style="color:#facc15">${usedToday}</div>
-  </div>
+              <div>
+                <div>Сьогодні</div>
+                <div class="cat-num" style="color:#facc15">${usedToday}</div>
+              </div>
 
-  <div>
-    <div>Всього</div>
-    <div class="cat-num" style="color:#f87171">${usedTotal}</div>
-  </div>
-</div>
+              <div>
+                <div>Всього</div>
+                <div class="cat-num" style="color:#f87171">${usedTotal}</div>
+              </div>
+            </div>
+          </div>
         `;
       }).join('');
     }
