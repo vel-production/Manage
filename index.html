@@ -283,6 +283,7 @@
 <script>
 // ── CONFIG ──────────────────────────────────────────────────
 const SHEET_ID = '1-yF9f9LepfGBpg1fyhewTcgT7oePscPEScD9v-8Ggn4';
+const API_URL = 'https://script.google.com/macros/s/AKfycbxCsav4W8gkyxBE0NhLCZuxV2eTcRuMh5ul9Vv8gDW6JbqHmueOVJaxzhDyE5wI5enIig/exec';
 const ADMIN_PASS = 'admin123'; // ← змінити на свій
 const POLL_MS = 15000;
 
@@ -495,15 +496,21 @@ function revealCdk(id, code) {
 }
 
 // Worker toggle — shows instruction since we can't write to Sheets without API key
-function workerToggleCdk(id) {
+async function workerToggleCdk(id) {
   const c = cdks[id];
-  if (!c) return;
-  const msg = c._used
-    ? `Щоб позначити як активний — зміни значення в колонці "used" на FALSE у Google Таблиці`
-    : `Позначити "${c.label||'цей CDK'}" як використаний?\n\nВстав TRUE в колонку "used" у Google Таблиці для цього рядка.`;
-  alert(msg);
-}
+  const newStatus = !c._used;
 
+  await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "toggle",
+      row: id,
+      used: newStatus ? "TRUE" : "FALSE"
+    })
+  });
+
+  loadData();
+}
 // ── COPY ───────────────────────────────────────────────────
 let copyTimers = {};
 function copyText(text, btnEl) {
@@ -625,15 +632,22 @@ function saveAccForm() {
   closeModal();
 }
 
-function saveCdkForm() {
+async function saveCdkForm() {
   const data = {
+    action: "add",
     label: document.getElementById('f-label').value,
     code: document.getElementById('f-code').value,
     used: document.getElementById('f-status').value,
     note: document.getElementById('f-note').value,
   };
-  prompt('Скопіюй рядок для таблиці CDK (Ctrl+C):', `${data.label}\t${data.code}\t${data.used}\t${data.note}`);
+
+  await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify(data)
+  });
+
   closeModal();
+  loadData();
 }
 
 // ── UTILS ──────────────────────────────────────────────────
