@@ -1552,6 +1552,136 @@
     radial-gradient(700px at 50% 100%, #9333ea22, transparent);
   z-index: -1;
 }   
+  @media (max-width: 720px) {
+  html {
+    font-size: 14px;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+
+  header {
+    padding: 12px;
+  }
+
+  .header-inner,
+  main {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  main {
+    padding: 14px 12px 60px;
+  }
+
+  .logo-title {
+    font-size: 18px;
+    line-height: 1.1;
+  }
+
+  .logo-sub {
+    font-size: 11px;
+  }
+
+  .header-inner {
+    gap: 8px;
+  }
+
+  .header-right {
+    gap: 6px;
+  }
+
+  .role-badge,
+  .btn-ghost {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    min-height: 90px;
+  }
+
+  .cat-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .cat-stats.accounts-mode {
+    grid-template-columns: 1fr;
+  }
+
+  .cat-card,
+  .account-quick-card {
+    width: 100%;
+  }
+
+  .tabs {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-add {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .chips {
+    gap: 8px;
+  }
+
+  .chip {
+    flex: 1;
+    min-width: 100px;
+    text-align: center;
+  }
+
+  .account-card-top {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .account-balance-box {
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+  }
+
+  .account-line {
+    grid-template-columns: 70px 1fr;
+    gap: 10px;
+  }
+
+  .account-line > div:last-child {
+    grid-column: 2;
+  }
+
+  .account-value {
+    word-break: break-all;
+  }
+
+  .btn-copy {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .modal-box {
+    max-width: 96vw;
+    padding: 20px;
+  }
+
+  .account-choice-grid {
+    grid-template-columns: 1fr;
+  }
+}  
   </style>
 </head>
 <body>   
