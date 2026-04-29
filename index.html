@@ -1446,7 +1446,8 @@ function confirmNo() {
   _id: i,
   _used: (c.used || '').toLowerCase() === 'true' || c.used === '1',
   category: c.category || 'Spotify',
-  note: String(c.note || '').toLowerCase() === 'false' ? '' : (c.note || '')
+  note: String(c.note || '').toLowerCase() === 'false' ? '' : (c.note || ''),
+  used_at: c.used_at || ''
 }));
 
         statsRows = parseCSV(await rS.text());
@@ -1548,7 +1549,7 @@ function confirmNo() {
       <button class="chip chip-all${filterUsed === 'all' ? ' active' : ''}" onclick="filterUsed='all';render()">Всі</button>
       <button class="chip chip-active${filterUsed === 'active' ? ' active' : ''}" onclick="filterUsed='active';render()">✓ Активні</button>
       <button class="chip chip-used${filterUsed === 'used' ? ' active' : ''}" onclick="filterUsed='used';render()">✕ Використані</button>
-      <button class="chip chip-today" onclick="toast('Фільтр за сьогодні додамо наступним кроком', 'ok')">▣ Використані сьогодні</button>
+      <button class="chip chip-today${filterUsed === 'today' ? ' active' : ''}" onclick="filterUsed='today';render()">▣ Використані сьогодні</button>
     `;
   }
 }
@@ -1580,6 +1581,13 @@ function render() {
         let list = cdks.filter(c => {
           if (filterUsed === 'active' && c._used) return false;
           if (filterUsed === 'used' && !c._used) return false;
+          if (filterUsed === 'today') {
+          if (!c._used) return false;
+  if (!c.used_at) return false;
+
+  const today = new Date().toISOString().slice(0, 10);
+  if (!String(c.used_at).startsWith(today)) return false;
+}
           if (filterCategory !== 'all' && c.category !== filterCategory) return false;
           if (!q) return true;
 
@@ -1680,7 +1688,7 @@ function toggleSelect(id) {
 
 async function deleteSelectedCdks() {
   if (!selected.size) {
-    alert('Нічого не вибрано');
+    toast('Нічого не вибрано', 'err');
     return;
   }
 
@@ -1705,6 +1713,12 @@ async function deleteFilteredCdks() {
   const list = cdks.filter(c => {
     if (filterUsed === 'active' && c._used) return false;
     if (filterUsed === 'used' && !c._used) return false;
+    if (filterUsed === 'today') {
+    if (!c.used_at) return false;
+
+  const today = new Date().toISOString().slice(0, 10);
+  if (!c.used_at.startsWith(today)) return false;
+}
     if (filterCategory !== 'all' && c.category !== filterCategory) return false;
     return true;
   });
@@ -1807,7 +1821,8 @@ if (!ok) return;
         type: 'cdk',
         action: 'toggle',
         row: id,
-        used: newStatus ? 'TRUE' : 'FALSE'
+        used: newStatus ? 'TRUE' : 'FALSE',
+        used_at: newStatus ? new Date().toISOString() : ''
       });
 
       setTimeout(loadData, 1000);
@@ -2091,7 +2106,10 @@ if (!ok) return;
       codes: filteredCodes
     });
 
-    toast('CDK додано', 'ok');
+        toast('CDK додано', 'ok');
+    closeModal();
+    setTimeout(loadData, 1000);
+    return;
 
   } else {
     await postApi({
@@ -2104,9 +2122,9 @@ if (!ok) return;
       note,
       category
     });
-  }
 
-  toast('CDK оновлено', 'ok');
+    toast('CDK оновлено', 'ok');
+  }
 
   closeModal();
   setTimeout(loadData, 1000);
@@ -2169,6 +2187,5 @@ if (!ok) return;
   }
 });
   </script>
-  <div id="toast"></div>
 </body>
 </html>
