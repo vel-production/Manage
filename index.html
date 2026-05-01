@@ -2582,7 +2582,7 @@ body.profit-mode .tabs {
 
   <script>
     const SHEET_ID = '1-yF9f9LepfGBpg1fyhewTcgT7oePscPEScD9v-8Ggn4';
-    const API_URL = 'https://script.google.com/macros/s/AKfycbxxu20MY-e3dYJb61DLkwvfRQPJRwrwc02FgWt-uRvWgh_zrH3bF87JiQNbSyn0YXQHEQ/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyIr6dLFEeisGaImUdX_0AL1wbL2DjcLrqtOM3SIUNwRllR6Ow7XWlvLXn4CO1sZwiC/exec';
     const POLL_MS = 0;
 
     const CATEGORIES = ['Spotify', 'Claude', 'ChatGPT', 'Grok'];
@@ -2832,14 +2832,18 @@ async function enterAsWorker() {
 }));
 
    statsRows = parseCSV(await rS.text());
-        profitRows = parseCSV(await rP.text()).map((r, i) => ({
-  _row: i,
-  game: r.game || r.Game || r['Гра'] || '',
-  product: r.product || r.Product || r['Товар'] || r['товар'] || r['product '] || r[' Product'] || Object.values(r)[1] || '',
-  sell_rub: r.sell_rub || r.sell || r['Продажа'] || r['Продажа ₽'] || '',
-  buy_usd: r.buy_usd || r.buy || r['Закуп $'] || '',
-  match: r.match || r.Match || r['Матч'] || ''
-}));
+  profitRows = parseCSV(await rP.text()).map((r, i) => {
+  const vals = Object.values(r);
+
+  return {
+    _row: i,
+    game: r.game || r.Game || r['Гра'] || vals[0] || '',
+    product: r.product || r.Product || r['Товар'] || r['товар'] || vals[1] || '',
+    sell_rub: r.sell_rub || r.sell || r['Продажа'] || r['Продажа ₽'] || vals[2] || '',
+    buy_usd: r.buy_usd || r.buy || r['Закуп $'] || vals[3] || '',
+    match: r.match || r.Match || r['Матч'] || vals[4] || ''
+  };
+});
 
         updateStats();
         render();
@@ -3232,7 +3236,7 @@ ${isAdmin ? `
               <th>Продажа</th>
               <th>Закуп $</th>
               <th>Прибуток $</th>
-              ${isAdmin ? '<th>Редагувати</th>' : ''}
+              ${isAdmin ? '<th>Дії</th>' : ''}
             </tr>
           </thead>
 
@@ -3244,8 +3248,9 @@ ${isAdmin ? `
                 <td>${fmtUsd(r.buyUsd)}</td>
                 <td class="yellow">${fmtUsd(r.profitUsd)}</td>
                 ${isAdmin ? `
-                  <td>
+                  <td style="display:flex;gap:8px">
                     <button class="btn-mini" onclick="editProfitProduct(${r._row})">✎</button>
+                    <button class="btn-mini" style="border-color:#ef4444;color:#f87171" onclick="deleteProfitProduct(${r._row})">🗑</button>
                   </td>
                 ` : ''}
               </tr>
@@ -3286,19 +3291,6 @@ function editPlayerokRate() {
 
 function editAccountRate() {
   openRateModal('accounts');
-}
-
-function saveRate(type) {
-  const val = document.getElementById('rate-value').value.trim().replace(',', '.');
-
-  if (type === 'playerok') {
-    localStorage.setItem('playerokRate', val);
-  } else {
-    localStorage.setItem('accountRateManual', val);
-  }
-
-  closeModal();
-  render();
 }
 
 function openAddProfitProduct() {
@@ -3424,6 +3416,25 @@ async function saveProfitProduct(rowIndex) {
   closeModal();
   setTimeout(loadData, 1000);
 }
+
+async function deleteProfitProduct(rowIndex) {
+  const ok = await showConfirm(
+    'Видалити товар?',
+    'Цей товар буде видалено з ProfitProducts.'
+  );
+
+  if (!ok) return;
+
+  await postApi({
+    type: 'profit',
+    action: 'delete',
+    row: rowIndex
+  });
+
+  toast('Товар видалено', 'ok');
+  closeModal();
+  setTimeout(loadData, 1000);
+}    
 
 function openCustomOrder() {
   document.getElementById('modal-title').textContent = '';
