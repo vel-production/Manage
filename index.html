@@ -2846,15 +2846,11 @@ async function loadData() {
 
   return {
     _row: i,
-    game: String(r.game || r.Game || vals[0] || '').trim(),
-    product: String(
-      r.product || r.Product || vals[1] ||
-      r.match || r.Match || vals[4] ||
-      ''
-    ).trim(),
-    sell_rub: String(r.sell_rub || r.sell || vals[2] || '').trim(),
-    buy_usd: String(r.buy_usd || r.buy || vals[3] || '').trim(),
-    match: String(r.match || r.Match || vals[4] || '').trim()
+    game: String(r.game || vals[0] || '').trim(),
+    product: String(r.product || vals[1] || '').trim(),
+    sell_rub: String(r.sell_rub || vals[2] || '').trim(),
+    buy_usd: String(r.buy_usd || vals[3] || '').trim(),
+    match: String(r.match || vals[4] || '').trim()
   };
 });
 
