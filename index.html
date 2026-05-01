@@ -2832,16 +2832,43 @@ async function enterAsWorker() {
 }));
 
    statsRows = parseCSV(await rS.text());
-  profitRows = parseCSV(await rP.text()).map((r, i) => {
+  const profitRaw = parseCSV(await rP.text());
+
+profitRows = profitRaw.map((r, i) => {
+  const keys = Object.keys(r);
   const vals = Object.values(r);
 
   return {
     _row: i,
     game: r.game || r.Game || r['Гра'] || vals[0] || '',
-    product: r.product || r.Product || r['Товар'] || r['товар'] || vals[1] || '',
-    sell_rub: r.sell_rub || r.sell || r['Продажа'] || r['Продажа ₽'] || vals[2] || '',
-    buy_usd: r.buy_usd || r.buy || r['Закуп $'] || vals[3] || '',
-    match: r.match || r.Match || r['Матч'] || vals[4] || ''
+    product:
+      r.product ||
+      r.Product ||
+      r['Товар'] ||
+      r['товар'] ||
+      r['Назва'] ||
+      r['name'] ||
+      vals[1] ||
+      '',
+    sell_rub:
+      r.sell_rub ||
+      r.sell ||
+      r['Продажа'] ||
+      r['Продажа ₽'] ||
+      vals[2] ||
+      '',
+    buy_usd:
+      r.buy_usd ||
+      r.buy ||
+      r['Закуп $'] ||
+      vals[3] ||
+      '',
+    match:
+      r.match ||
+      r.Match ||
+      r['Матч'] ||
+      vals[4] ||
+      ''
   };
 });
 
