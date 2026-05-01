@@ -2582,7 +2582,7 @@ body.profit-mode .tabs {
 
   <script>
     const SHEET_ID = '1-yF9f9LepfGBpg1fyhewTcgT7oePscPEScD9v-8Ggn4';
-    const API_URL = 'https://script.google.com/macros/s/AKfycbzZtmcPHTcBlkcvLX7inaSM293DtswOMcFkxAYSBcKY5olpxJdqWtm5chCs4sd-eWSFOA/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxxu20MY-e3dYJb61DLkwvfRQPJRwrwc02FgWt-uRvWgh_zrH3bF87JiQNbSyn0YXQHEQ/exec';
     const POLL_MS = 0;
 
     const CATEGORIES = ['Spotify', 'Claude', 'ChatGPT', 'Grok'];
@@ -3197,7 +3197,7 @@ function renderProfit() {
 </div>
 
 ${isAdmin ? `
-  <button class="btn-mini" onclick="editProfitProduct(${r._row})">✎</button>
+  <button class="btn-mini" onclick="openAddProfitProduct()">
     ＋ Додати товар
   </button>
 ` : ''}
@@ -3332,7 +3332,7 @@ function openAddProfitProduct() {
   document.getElementById('modal').style.display = 'flex';
 }    
 
-function saveNewProfitProduct() {
+async function saveNewProfitProduct() {
   const game = document.getElementById('new-game').value.trim();
   const product = document.getElementById('new-product').value.trim();
   const sell = document.getElementById('new-sell').value.trim();
@@ -3344,7 +3344,9 @@ function saveNewProfitProduct() {
     return;
   }
 
-  profitRows.push({
+  await postApi({
+    type: 'profit',
+    action: 'add',
     game,
     product,
     sell_rub: sell,
@@ -3353,12 +3355,10 @@ function saveNewProfitProduct() {
   });
 
   profitGame = game;
-
+  toast('Товар додано', 'ok');
   closeModal();
-  render();
-  renderChips();
-  toast('Товар додано на сайті. В Google Sheets ще не записано.', 'ok');
-}    
+  setTimeout(loadData, 1000);
+} 
 
 function editProfitProduct(rowIndex) {
   const row = profitRows.find(r => r._row === rowIndex);
@@ -3401,18 +3401,21 @@ function editProfitProduct(rowIndex) {
   document.getElementById('modal').style.display = 'flex';
 }
 
-function saveProfitProduct(oldMatch) {
-  const row = profitRows.find(r => String(r.match || '') === oldMatch);
-  if (!row) return;
+async function saveProfitProduct(rowIndex) {
+  await postApi({
+    type: 'profit',
+    action: 'update',
+    row: rowIndex,
+    game: document.getElementById('pp-game').value.trim(),
+    product: document.getElementById('pp-product').value.trim(),
+    sell_rub: document.getElementById('pp-sell').value.trim(),
+    buy_usd: document.getElementById('pp-buy').value.trim(),
+    match: document.getElementById('pp-match').value.trim()
+  });
 
-  row.product = document.getElementById('pp-product').value.trim();
-  row.sell_rub = document.getElementById('pp-sell').value.trim();
-  row.buy_usd = document.getElementById('pp-buy').value.trim();
-  row.match = document.getElementById('pp-match').value.trim();
-
+  toast('Товар оновлено', 'ok');
   closeModal();
-  render();
-  toast('Змінено тільки на сайті. В Google Sheets поки не записано.', 'ok');
+  setTimeout(loadData, 1000);
 }
 
 function openCustomOrder() {
@@ -3758,7 +3761,7 @@ if (!ok) return;
 
   selected.clear();
   setTimeout(loadData, 1000);
-}
+}      
 
     function cdkCard(c) {
       const adminBtns = isAdmin ? `
