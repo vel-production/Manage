@@ -590,6 +590,53 @@ function fmtUsd(v) {
   return '$' + v.toFixed(2).replace('.', ',');
 }
 
+function getSalesRowsRaw(period = 'day') {
+  const now = new Date();
+  const today = todayLocal();
+
+  return salesRows.filter(r => {
+    const d = normalizeDate(r.date);
+    if (!d) return false;
+
+    if (period === 'day') return d === today;
+
+    if (period === 'month') {
+      const rd = new Date(d + 'T00:00:00');
+      return rd.getFullYear() === now.getFullYear() &&
+             rd.getMonth() === now.getMonth();
+    }
+
+    return true;
+  });
+}
+
+function getUnmatchedSales(period = 'day') {
+  return getSalesRowsRaw(period).filter(r => {
+    return String(r.matched || '').toUpperCase() === 'NO' || num(r.profit_usd) === 0;
+  });
+}
+
+function openUnmatchedSales() {
+  const list = getUnmatchedSales('day');
+
+  document.getElementById('modal-title').textContent = 'Продажі без match';
+
+  document.getElementById('modal-body').innerHTML = list.length
+    ? `
+      <div style="display:grid;gap:10px">
+        ${list.map(r => `
+          <div class="field-note">
+            <b>${esc(r.title || 'Без назви')}</b><br>
+            <span>${esc(r.date || '')}</span>
+          </div>
+        `).join('')}
+      </div>
+    `
+    : `<div class="empty">Всі продажі сьогодні знайдені ✅</div>`;
+
+  document.getElementById('modal').style.display = 'flex';
+}
+
 function getSalesRows(period = 'day') {
   const now = new Date();
   const today = now.toISOString().slice(0, 10);
@@ -673,6 +720,7 @@ function renderProfit() {
   const dayUsd = getSalesSum('profit_usd', 'day');
   const salesToday = getSalesCount('day');
   const monthUsd = getSalesSum('profit_usd', 'month');
+  const unmatchedToday = getUnmatchedSales('day').length;
 
   el.innerHTML = `
     <div class="profit-dashboard">
@@ -684,6 +732,11 @@ function renderProfit() {
       <div class="profit-stat">
         <span>Продажів сьогодні</span>
         <b>${salesToday}</b>
+      </div>
+
+      <div class="profit-stat profit-custom" onclick="openUnmatchedSales()">
+        <span>Без match сьогодні</span>
+        <b style="color:${unmatchedToday ? '#f87171' : '#4ade80'}">${unmatchedToday}</b>
       </div>
 
       <div class="profit-stat">
