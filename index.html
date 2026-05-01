@@ -2870,6 +2870,38 @@ body.profit-mode .profit-stat b {
 
 .profit-card-actions .btn-mini {
   height: 36px !important;
+}  
+ /* FIX PROFIT SCROLL + ALIGN */
+.profit-table-wrap {
+  overflow: visible !important;
+  padding: 16px !important;
+}
+
+.profit-box {
+  overflow: visible !important;
+}
+
+.profit-grid {
+  align-items: start !important;
+}
+
+.profit-card {
+  height: 230px !important;
+  min-height: 230px !important;
+  max-height: 230px !important;
+  overflow: hidden !important;
+}
+
+.profit-card-actions {
+  margin-top: 8px !important;
+}
+
+body.profit-mode {
+  overflow-y: auto !important;
+}
+
+body.profit-mode #cards {
+  overflow: visible !important;
 }   
   </style>
 </head>
@@ -3621,12 +3653,23 @@ function getProfitIcon(game) {
   return 'app.png';
 }
 
+function profitUsesAccountRate() {
+  const g = String(profitGame || '').toLowerCase();
+  return !g.includes('apps') && !g.includes('app');
+}
+
+function showCustomOrderBtn() {
+  const g = String(profitGame || '').toLowerCase();
+  return !g.includes('apps') && !g.includes('app') && !g.includes('roblox');
+}    
+
 function renderProfit() {
   const el = document.getElementById('cards');
   const q = document.getElementById('search').value.toLowerCase();
 
   const accountRate = getCurrentAccountRate();
   const playerokRate = getPlayerokRate();
+  const useAccRate = profitUsesAccountRate();
 
   const rows = profitRows.filter(r => {
     if (profitGame && String(r.game).trim() !== String(profitGame).trim()) return false;
@@ -3654,10 +3697,12 @@ function renderProfit() {
         <b>${fmtUsd(monthRub / playerokRate)}</b>
       </div>
 
-      <div class="profit-stat profit-custom" onclick="openCustomOrder()">
-        <span>Індивідуальний заказ</span>
-        <b>🧾</b>
-      </div>
+      ${showCustomOrderBtn() ? `
+        <div class="profit-stat profit-custom" onclick="openCustomOrder()">
+          <span>Індивідуальний заказ</span>
+          <b>🧾</b>
+        </div>
+      ` : ''}
     </div>
 
     <div class="profit-box">
@@ -3673,11 +3718,13 @@ function renderProfit() {
         ` : ''}
 
         <div class="profit-rate-panel">
-          <div class="profit-rate-card">
-            <span>Курс Accounts</span>
-            <b>${accountRate}</b>
-            <button onclick="editAccountRate()">змінити</button>
-          </div>
+          ${useAccRate ? `
+            <div class="profit-rate-card">
+              <span>Курс Accounts</span>
+              <b>${accountRate}</b>
+              <button onclick="editAccountRate()">змінити</button>
+            </div>
+          ` : ''}
 
           <div class="profit-rate-card">
             <span>Курс Playerok</span>
@@ -3730,7 +3777,14 @@ function renderProfit() {
 function calcProfitRow(r, accountRate, playerokRate) {
   const sell = num(r.sell_rub);
   const buyUsd = num(r.buy_usd);
-  const buyRub = buyUsd * accountRate * playerokRate;
+
+  const game = String(r.game || '').toLowerCase();
+  const useAccRate = !(game.includes('apps') || game.includes('app'));
+
+  const buyRub = useAccRate
+    ? buyUsd * accountRate * playerokRate
+    : buyUsd * playerokRate;
+
   const commission = sell * 0.14 + fixedFee(sell);
   const profitRub = sell - commission - buyRub;
   const profitUsd = profitRub / playerokRate;
