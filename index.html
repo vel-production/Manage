@@ -2266,6 +2266,128 @@ body.profit-mode .tabs {
 .profit-title {
   font-size: 26px;
 }    
+.profit-dashboard {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.profit-stat {
+  background: linear-gradient(145deg, #111827, #080d19);
+  border: 1px solid #ffffff18;
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: inset 0 0 30px #ffffff05;
+}
+
+.profit-stat span {
+  color: #94a3b8;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.profit-stat b {
+  display: block;
+  margin-top: 8px;
+  font-size: 28px;
+  color: #4ade80;
+  font-weight: 900;
+}
+
+.profit-stat small {
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.profit-custom {
+  cursor: pointer;
+  border-color: #8b5cf680;
+}
+
+.profit-custom b {
+  color: #a78bfa;
+}
+
+.btn-mini {
+  background: #7c3aed18;
+  border: 1px solid #8b5cf680;
+  color: #c4b5fd;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-weight: 900;
+}
+
+.custom-order-box {
+  position: relative;
+  background: linear-gradient(145deg, #101827, #080d19);
+  border: 1px solid #8b5cf655;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 0 30px #8b5cf622;
+}
+
+.custom-x {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: #ef444418;
+  border: 1px solid #ef444455;
+  color: #f87171;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-weight: 900;
+}
+
+.custom-title {
+  font-size: 22px;
+  font-weight: 900;
+  margin-bottom: 16px;
+}
+
+.custom-grid {
+  display: grid;
+  grid-template-columns: 1fr 160px 160px;
+  gap: 12px;
+}
+
+.custom-result {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.custom-result div {
+  background: #ffffff08;
+  border: 1px solid #ffffff12;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.custom-result span {
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.custom-result b {
+  display: block;
+  margin-top: 6px;
+  font-size: 20px;
+}
+
+@media (max-width: 900px) {
+  .profit-dashboard,
+  .custom-result {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .custom-grid {
+    grid-template-columns: 1fr;
+  }
+}    
   </style>
 </head>
 <body>   
@@ -2425,10 +2547,13 @@ body.profit-mode .tabs {
     let accountRateManual = 0.783;
     let playerokRate = 80.36;
     let editId = null;
+    let profitGame = 'Roblox';
+    let customOrder = null;
     let pollTimer = null;
     let selected = new Set();
     let confirmResolve = null;
     let currentUser = "";
+    
 
 function showConfirm(title, text, type = 'danger') {
   return new Promise(resolve => {
@@ -2842,13 +2967,9 @@ return;
   if (currentTab === 'profit') {
     const games = [...new Set(profitRows.map(r => r.game).filter(Boolean))];
 
-    if (profitGame === 'all' && games.length) {
-      profitGame = games[0];
-    }
-
-    c.innerHTML = games.map(g => `
-      <button class="chip${profitGame === g ? ' active' : ''}" onclick="profitGame='${esc(g)}';render()">
-        ${esc(g)}
+    c.innerHTML = games.map(game => `
+      <button class="chip${profitGame === game ? ' active' : ''}" onclick="profitGame='${esc(game)}';render()">
+        ${esc(game)}
       </button>
     `).join('');
 
@@ -2861,7 +2982,6 @@ return;
         ${v === 'all' ? 'Всі' : v === 'xbox' ? 'Xbox' : 'App Store'}
       </button>
     `).join('');
-
     return;
   }
 
@@ -2957,51 +3077,67 @@ function renderProfit() {
   const q = document.getElementById('search').value.toLowerCase();
 
   const accountRate = getCurrentAccountRate();
+  const playerokRate = getPlayerokRate();
 
   const rows = profitRows.filter(r => {
-  if (profitGame !== 'all' && r.game !== profitGame) return false;
-  return !q || ((r.game || '') + (r.product || '')).toLowerCase().includes(q);
-  }).map(r => {
-    const sell = num(r.sell_rub);
-    const buyUsd = num(r.buy_usd);
-    const buyRub = buyUsd * accountRate * playerokRate;
-    const commission = sell * 0.14 + fixedFee(sell);
-    const profitRub = sell - commission - buyRub;
-    const profitUsd = profitRub / playerokRate;
+    if (profitGame && r.game !== profitGame) return false;
+    return !q || ((r.product || '') + (r.match || '')).toLowerCase().includes(q);
+  }).map(r => calcProfitRow(r, accountRate, playerokRate));
 
-    return {
-      ...r,
-      sell,
-      buyUsd,
-      buyRub,
-      commission,
-      profitRub,
-      profitUsd
-    };
-  });
+  const dayRub = getSalesSum('profit_rub', 'day');
+  const monthRub = getSalesSum('profit_rub', 'month');
+  const dayUsd = getSalesSum('profit_usd', 'day');
+  const salesToday = getSalesCount('day');
 
   el.innerHTML = `
+    <div class="profit-dashboard">
+      <div class="profit-stat">
+        <span>Прибуток сьогодні</span>
+        <b>${fmtRub(dayRub)}</b>
+        <small>${fmtUsd(dayUsd)}</small>
+      </div>
+
+      <div class="profit-stat">
+        <span>Продажів сьогодні</span>
+        <b>${salesToday}</b>
+        <small>SalesLog</small>
+      </div>
+
+      <div class="profit-stat">
+        <span>Прибуток за місяць</span>
+        <b>${fmtRub(monthRub)}</b>
+        <small>чистими</small>
+      </div>
+
+      <div class="profit-stat profit-custom" onclick="openCustomOrder()">
+        <span>Індивідуальний заказ</span>
+        <b>＋</b>
+        <small>рахувати вручну</small>
+      </div>
+    </div>
+
+    ${customOrder ? customOrderBox(accountRate, playerokRate) : ''}
+
     <div class="profit-box">
       <div class="profit-head">
-  <div>
-    <div class="profit-title">💸 Profit Board</div>
-    <div class="profit-sub">Автоматичний розрахунок маржі з ProfitProducts</div>
-  </div>
+        <div>
+          <div class="profit-title">💸 Profit Board</div>
+        </div>
 
-  <div class="profit-rate-panel">
-    <div class="profit-rate-card">
-      <span>Курс Accounts</span>
-      <b>${accountRate}</b>
-      <button onclick="editAccountRate()">змінити</button>
-    </div>
+        <div class="profit-rate-panel">
+          <div class="profit-rate-card">
+            <span>Курс Accounts</span>
+            <b>${accountRate}</b>
+            <button onclick="editAccountRate()">змінити</button>
+          </div>
 
-    <div class="profit-rate-card">
-      <span>Курс Playerok</span>
-      <b>${playerokRate}</b>
-      <button onclick="editPlayerokRate()">змінити</button>
-    </div>
-  </div>
-</div>
+          <div class="profit-rate-card">
+            <span>Курс Playerok</span>
+            <b>${playerokRate}</b>
+            <button onclick="editPlayerokRate()">змінити</button>
+          </div>
+        </div>
+      </div>
 
       <div class="profit-table-wrap">
         <table class="profit-table">
@@ -3014,10 +3150,11 @@ function renderProfit() {
               <th>Прибуток</th>
               <th>Прибуток $</th>
               <th>Закуп $</th>
+              ${isAdmin ? '<th>Редагувати</th>' : ''}
             </tr>
           </thead>
           <tbody>
-            ${rows.map(r => `
+            ${rows.map((r, idx) => `
               <tr>
                 <td><b>${esc(r.product)}</b></td>
                 <td>${fmtRub(r.buyRub)}</td>
@@ -3026,6 +3163,11 @@ function renderProfit() {
                 <td class="good">${fmtRub(r.profitRub)}</td>
                 <td class="yellow">${fmtUsd(r.profitUsd)}</td>
                 <td>${fmtUsd(r.buyUsd)}</td>
+                ${isAdmin ? `
+                  <td>
+                    <button class="btn-mini" onclick="editProfitProduct('${esc(r.match)}')">✎</button>
+                  </td>
+                ` : ''}
               </tr>
             `).join('')}
           </tbody>
@@ -3034,6 +3176,196 @@ function renderProfit() {
     </div>
   `;
 }
+
+function calcProfitRow(r, accountRate, playerokRate) {
+  const sell = num(r.sell_rub);
+  const buyUsd = num(r.buy_usd);
+  const buyRub = buyUsd * accountRate * playerokRate;
+  const commission = sell * 0.14 + fixedFee(sell);
+  const profitRub = sell - commission - buyRub;
+  const profitUsd = profitRub / playerokRate;
+
+  return {
+    ...r,
+    sell,
+    buyUsd,
+    buyRub,
+    commission,
+    profitRub,
+    profitUsd
+  };
+}
+
+function getPlayerokRate() {
+  return Number(localStorage.getItem('playerokRate') || '80.36');
+}
+
+function editPlayerokRate() {
+  openRateModal('playerok');
+}
+
+function editAccountRate() {
+  openRateModal('account');
+}
+
+function openRateModal(type) {
+  const current = type === 'playerok' ? getPlayerokRate() : getCurrentAccountRate();
+
+  document.getElementById('modal-title').textContent =
+    type === 'playerok' ? 'Курс Playerok' : 'Курс Accounts';
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="form-field">
+      <label class="form-label">Новий курс</label>
+      <input class="form-input" id="rate-value" value="${current}">
+    </div>
+
+    <div class="form-footer">
+      <button class="btn-cancel" onclick="closeModal()">Скасувати</button>
+      <button class="btn-primary" style="width:auto" onclick="saveRate('${type}')">Зберегти</button>
+    </div>
+  `;
+
+  document.getElementById('modal').style.display = 'flex';
+}
+
+function saveRate(type) {
+  const val = document.getElementById('rate-value').value.trim().replace(',', '.');
+
+  if (type === 'playerok') {
+    localStorage.setItem('playerokRate', val);
+  } else {
+    localStorage.setItem('accountRateManual', val);
+  }
+
+  closeModal();
+  render();
+}
+
+function getCurrentAccountRate() {
+  const manual = localStorage.getItem('accountRateManual');
+  if (manual) return Number(manual);
+
+  const xbox = accounts.find(a => String(a.type || '').toLowerCase() === 'xbox' && a.rate);
+  const any = accounts.find(a => a.rate);
+  return num((xbox || any || {}).rate || '0.783');
+}
+
+function editProfitProduct(match) {
+  const row = profitRows.find(r => String(r.match || '') === match);
+  if (!row) return;
+
+  document.getElementById('modal-title').textContent = 'Редагувати товар';
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="form-field">
+      <label class="form-label">Товар</label>
+      <input class="form-input" id="pp-product" value="${esc(row.product)}">
+    </div>
+
+    <div class="form-field">
+      <label class="form-label">Продажа ₽</label>
+      <input class="form-input" id="pp-sell" value="${esc(row.sell_rub)}">
+    </div>
+
+    <div class="form-field">
+      <label class="form-label">Закуп $</label>
+      <input class="form-input" id="pp-buy" value="${esc(row.buy_usd)}">
+    </div>
+
+    <div class="form-field">
+      <label class="form-label">Match</label>
+      <input class="form-input" id="pp-match" value="${esc(row.match)}">
+    </div>
+
+    <div class="form-footer">
+      <button class="btn-cancel" onclick="closeModal()">Скасувати</button>
+      <button class="btn-primary" style="width:auto" onclick="saveProfitProduct('${esc(match)}')">Зберегти</button>
+    </div>
+  `;
+
+  document.getElementById('modal').style.display = 'flex';
+}
+
+function saveProfitProduct(oldMatch) {
+  const row = profitRows.find(r => String(r.match || '') === oldMatch);
+  if (!row) return;
+
+  row.product = document.getElementById('pp-product').value.trim();
+  row.sell_rub = document.getElementById('pp-sell').value.trim();
+  row.buy_usd = document.getElementById('pp-buy').value.trim();
+  row.match = document.getElementById('pp-match').value.trim();
+
+  closeModal();
+  render();
+  toast('Змінено тільки на сайті. В Google Sheets поки не записано.', 'ok');
+}
+
+function openCustomOrder() {
+  customOrder = {
+    sell: '',
+    buy: '',
+    name: ''
+  };
+  render();
+}
+
+function closeCustomOrder() {
+  customOrder = null;
+  render();
+}
+
+function updateCustomOrder(field, value) {
+  customOrder[field] = value;
+  render();
+}
+
+function customOrderBox(accountRate, playerokRate) {
+  const sell = num(customOrder.sell);
+  const buyUsd = num(customOrder.buy);
+  const buyRub = buyUsd * accountRate * playerokRate;
+  const commission = sell * 0.14 + fixedFee(sell);
+  const profitRub = sell - commission - buyRub;
+  const profitUsd = profitRub / playerokRate;
+
+  return `
+    <div class="custom-order-box">
+      <button class="custom-x" onclick="closeCustomOrder()">✕</button>
+
+      <div class="custom-title">⚡ Індивідуальний заказ</div>
+
+      <div class="custom-grid">
+        <input class="form-input" placeholder="Назва" value="${esc(customOrder.name)}"
+          oninput="updateCustomOrder('name', this.value)">
+
+        <input class="form-input" placeholder="Продажа ₽" value="${esc(customOrder.sell)}"
+          oninput="updateCustomOrder('sell', this.value)">
+
+        <input class="form-input" placeholder="Закуп $" value="${esc(customOrder.buy)}"
+          oninput="updateCustomOrder('buy', this.value)">
+      </div>
+
+      <div class="custom-result">
+        <div>
+          <span>Закуп</span>
+          <b>${fmtRub(buyRub)}</b>
+        </div>
+        <div>
+          <span>Комісія</span>
+          <b class="bad">${fmtRub(commission)}</b>
+        </div>
+        <div>
+          <span>Чистий прибуток</span>
+          <b class="good">${fmtRub(profitRub)}</b>
+        </div>
+        <div>
+          <span>В $</span>
+          <b class="yellow">${fmtUsd(profitUsd)}</b>
+        </div>
+      </div>
+    </div>
+  `;
+}    
 
 function openRateModal(type) {
   const isAcc = type === 'accounts';
