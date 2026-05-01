@@ -2388,6 +2388,29 @@ body.profit-mode .tabs {
     grid-template-columns: 1fr;
   }
 }    
+.modal-overlay {
+  animation: modalFade .18s ease;
+}
+
+.modal-box {
+  animation: modalPop .22s ease;
+}
+
+@keyframes modalFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalPop {
+  from {
+    opacity: 0;
+    transform: scale(.94) translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}    
   </style>
 </head>
 <body>   
@@ -2481,17 +2504,18 @@ body.profit-mode .tabs {
       <div class="sync-info" id="sync-info"></div>
 
       <div class="tabs">
-        <button class="tab-btn active" id="tab-accounts" onclick="switchTab('accounts')">
-          👤 Акаунти
-        </button>
+  <button class="tab-btn active" id="tab-accounts" onclick="switchTab('accounts')">
+    👤 Акаунти
+  </button>
 
-        <button class="tab-btn" id="tab-cdks" onclick="switchTab('cdks')">
-          🔑 CDK Коди
-        </button>
-      </div>
-         <button class="tab-btn" id="tab-profit" onclick="switchTab('profit')">
-  💸 Profit Board
-    </button>
+  <button class="tab-btn" id="tab-cdks" onclick="switchTab('cdks')">
+    🔑 CDK Коди
+  </button>
+
+  <button class="tab-btn" id="tab-profit" onclick="switchTab('profit')">
+    💸 Profit Board
+  </button>
+</div>
 
       <div class="toolbar">
         <div class="search-wrap">
@@ -3215,7 +3239,7 @@ function editPlayerokRate() {
 }
 
 function editAccountRate() {
-  openRateModal('account');
+  openRateModal('accounts');
 }
 
 function saveRate(type) {
@@ -3297,8 +3321,25 @@ function closeCustomOrder() {
 
 function updateCustomOrder(field, value) {
   customOrder[field] = value;
-  render();
+  updateCustomResult();
 }
+
+function updateCustomResult() {
+  const accountRate = getCurrentAccountRate();
+  const playerokRate = getPlayerokRate();
+
+  const sell = num(customOrder.sell);
+  const buyUsd = num(customOrder.buy);
+  const buyRub = buyUsd * accountRate * playerokRate;
+  const commission = sell * 0.14 + fixedFee(sell);
+  const profitRub = sell - commission - buyRub;
+  const profitUsd = profitRub / playerokRate;
+
+  document.getElementById('custom-buy').textContent = fmtRub(buyRub);
+  document.getElementById('custom-commission').textContent = fmtRub(commission);
+  document.getElementById('custom-profit').textContent = fmtRub(profitRub);
+  document.getElementById('custom-usd').textContent = fmtUsd(profitUsd);
+}    
 
 function customOrderBox(accountRate, playerokRate) {
   const sell = num(customOrder.sell);
@@ -3314,33 +3355,31 @@ function customOrderBox(accountRate, playerokRate) {
 
       <div class="custom-title">⚡ Індивідуальний заказ</div>
 
-      <div class="custom-grid">
-        <input class="form-input" placeholder="Назва" value="${esc(customOrder.name)}"
-          oninput="updateCustomOrder('name', this.value)">
+      <div class="custom-grid" style="grid-template-columns:1fr 1fr">
+      
+      <input class="form-input" placeholder="Продажа ₽" value="${esc(customOrder.sell)}"
+    oninput="updateCustomOrder('sell', this.value)">
 
-        <input class="form-input" placeholder="Продажа ₽" value="${esc(customOrder.sell)}"
-          oninput="updateCustomOrder('sell', this.value)">
-
-        <input class="form-input" placeholder="Закуп $" value="${esc(customOrder.buy)}"
-          oninput="updateCustomOrder('buy', this.value)">
-      </div>
+  <input class="form-input" placeholder="Закуп $" value="${esc(customOrder.buy)}"
+    oninput="updateCustomOrder('buy', this.value)">
+</div>
 
       <div class="custom-result">
         <div>
           <span>Закуп</span>
-          <b>${fmtRub(buyRub)}</b>
+          <b id="custom-buy">${fmtRub(buyRub)}</b>
         </div>
         <div>
           <span>Комісія</span>
-          <b class="bad">${fmtRub(commission)}</b>
+          <b class="bad" id="custom-commission">${fmtRub(commission)}</b>
         </div>
         <div>
           <span>Чистий прибуток</span>
-          <b class="good">${fmtRub(profitRub)}</b>
+          <b class="good" id="custom-profit">${fmtRub(profitRub)}</b>
         </div>
         <div>
           <span>В $</span>
-          <b class="yellow">${fmtUsd(profitUsd)}</b>
+          <b class="yellow" id="custom-usd">${fmtUsd(profitUsd)}</b>
         </div>
       </div>
     </div>
