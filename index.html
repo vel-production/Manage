@@ -2843,6 +2843,7 @@ async function loadData() {
     statsRows = statsRaw;
 
     profitRows = profitRaw.map((r, i) => {
+    console.log('PROFIT RAW ROW', i, r.__cells, r);  
   const v = r.__cells || [];
 
   return {
