@@ -2721,6 +2721,87 @@ body.profit-mode .profit-stat b {
 .profit-mini-price {
   text-align: center;
 } 
+ /* FIX PROFIT CARDS CENTER + ICONS */
+.profit-grid {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+
+.profit-card {
+  min-height: 220px !important;
+  padding: 16px 14px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+}
+
+.profit-card-top {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+}
+
+.profit-icon-box {
+  width: 72px !important;
+  height: 72px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: visible !important;
+  margin: 0 auto !important;
+}
+
+.profit-game-icon {
+  width: 66px !important;
+  height: 66px !important;
+  object-fit: contain !important;
+  border-radius: 18px !important;
+  display: block !important;
+  filter: drop-shadow(0 0 18px #ffffff88) !important;
+}
+
+.profit-product-name {
+  width: 100% !important;
+  min-height: 48px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  font-size: 22px !important;
+  line-height: 1.05 !important;
+}
+
+.profit-price {
+  width: 100% !important;
+  text-align: center !important;
+  margin-top: 8px !important;
+  font-size: 34px !important;
+}
+
+.profit-card-info {
+  width: 100% !important;
+}
+
+.profit-card-row {
+  width: 100% !important;
+}
+
+@media (max-width: 1200px) {
+  .profit-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .profit-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}   
   </style>
 </head>
 <body>   
