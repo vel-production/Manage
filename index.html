@@ -2490,10 +2490,8 @@ body.profit-mode .tabs {
         </button>
       </div>
          <button class="tab-btn" id="tab-profit" onclick="switchTab('profit')">
-          💸 Profit Board
-        </button>
-      </div>
-      </div>
+  💸 Profit Board
+    </button>
 
       <div class="toolbar">
         <div class="search-wrap">
@@ -2543,11 +2541,11 @@ body.profit-mode .tabs {
     let filterType = 'all';
     let filterUsed = 'all';
     let filterCategory = 'all';
-    let profitGame = 'all';
+    let filterCategory = 'all';
+    let profitGame = 'Roblox';
     let accountRateManual = 0.783;
     let playerokRate = 80.36;
     let editId = null;
-    let profitGame = 'Roblox';
     let customOrder = null;
     let pollTimer = null;
     let selected = new Set();
@@ -3213,27 +3211,6 @@ function editAccountRate() {
   openRateModal('account');
 }
 
-function openRateModal(type) {
-  const current = type === 'playerok' ? getPlayerokRate() : getCurrentAccountRate();
-
-  document.getElementById('modal-title').textContent =
-    type === 'playerok' ? 'Курс Playerok' : 'Курс Accounts';
-
-  document.getElementById('modal-body').innerHTML = `
-    <div class="form-field">
-      <label class="form-label">Новий курс</label>
-      <input class="form-input" id="rate-value" value="${current}">
-    </div>
-
-    <div class="form-footer">
-      <button class="btn-cancel" onclick="closeModal()">Скасувати</button>
-      <button class="btn-primary" style="width:auto" onclick="saveRate('${type}')">Зберегти</button>
-    </div>
-  `;
-
-  document.getElementById('modal').style.display = 'flex';
-}
-
 function saveRate(type) {
   const val = document.getElementById('rate-value').value.trim().replace(',', '.');
 
@@ -3245,15 +3222,6 @@ function saveRate(type) {
 
   closeModal();
   render();
-}
-
-function getCurrentAccountRate() {
-  const manual = localStorage.getItem('accountRateManual');
-  if (manual) return Number(manual);
-
-  const xbox = accounts.find(a => String(a.type || '').toLowerCase() === 'xbox' && a.rate);
-  const any = accounts.find(a => a.rate);
-  return num((xbox || any || {}).rate || '0.783');
 }
 
 function editProfitProduct(match) {
@@ -3383,7 +3351,6 @@ function openRateModal(type) {
       <div class="rate-modal-icon">💱</div>
       <div class="rate-modal-title">Змінити ${title}</div>
       <input
-        <input
         class="rate-modal-input"
         id="rate-input"
         autocomplete="off"
