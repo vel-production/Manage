@@ -2446,7 +2446,147 @@ body.profit-mode .tabs {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
-}   
+}  
+/* COMPACT PROFIT BOARD */
+body.profit-mode main {
+  max-width: 1400px;
+}
+
+body.profit-mode .profit-dashboard {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+body.profit-mode .profit-stat {
+  padding: 12px 14px;
+  min-height: 82px;
+}
+
+body.profit-mode .profit-stat b {
+  font-size: 22px;
+}
+
+.profit-compact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 10px;
+  padding: 12px;
+}
+
+.profit-card-mini {
+  position: relative;
+  background: linear-gradient(145deg, #0b1220, #070b13);
+  border: 1px solid #ffffff14;
+  border-radius: 16px;
+  padding: 12px;
+  min-height: 138px;
+  overflow: hidden;
+}
+
+.profit-card-mini::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(180px at 20% 0%, #8b5cf622, transparent);
+  pointer-events: none;
+}
+
+.profit-mini-top {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.game-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 0 16px #8b5cf655;
+}
+
+.profit-mini-name {
+  font-size: 14px;
+  line-height: 1.2;
+  font-weight: 900;
+  color: #f8fafc;
+  min-height: 34px;
+  overflow: hidden;
+}
+
+.profit-mini-price {
+  position: relative;
+  font-size: 20px;
+  font-weight: 950;
+  color: #facc15;
+  margin-bottom: 8px;
+}
+
+.profit-mini-row {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.profit-mini-row b {
+  color: #e2e8f0;
+}
+
+.profit-mini-profit b {
+  color: #4ade80;
+}
+
+.profit-mini-actions {
+  position: relative;
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.profit-mini-actions .btn-mini {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 12px;
+}
+
+.profit-head {
+  padding: 12px 16px !important;
+}
+
+.profit-title {
+  font-size: 22px !important;
+}
+
+.profit-rate-panel {
+  gap: 8px !important;
+}
+
+.profit-rate-card {
+  padding: 8px 12px !important;
+  min-width: 125px !important;
+}
+
+.profit-rate-card b {
+  font-size: 18px !important;
+}
+
+@media (max-width: 900px) {
+  .profit-compact-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  body.profit-mode .profit-dashboard {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}    
   </style>
 </head>
 <body>   
@@ -3170,6 +3310,19 @@ function getSalesSum() {
 
 function getSalesCount() {
   return 0;
+}   
+
+function gameIcon(game) {
+  const g = String(game || '').toLowerCase();
+
+  if (g.includes('roblox')) return 'roblox.png';
+  if (g.includes('clash royale')) return 'clashroyale.png';
+  if (g.includes('brawl')) return 'brawlstars.png';
+  if (g.includes('fc')) return 'fcmobile.png';
+  if (g.includes('clash of clans')) return 'clashofclans.png';
+  if (g.includes('app') || g.includes('apps')) return 'apps.png';
+
+  return 'game.png';
 }    
 
 function renderProfit() {
@@ -3238,36 +3391,35 @@ ${isAdmin ? `
         </div>
       </div>
 
-      <div class="profit-table-wrap">
-        <table class="profit-table">
-          <thead>
-            <tr>
-              <th>Товар</th>
-              <th>Продажа</th>
-              <th>Закуп $</th>
-              <th>Прибуток $</th>
-              ${isAdmin ? '<th>Дії</th>' : ''}
-            </tr>
-          </thead>
-
-          <tbody>
-            ${rows.map(r => `
-              <tr>
-                <td><b>${esc(r.product || 'Без назви')}</b></td>
-                <td>${fmtRub(r.sell)}</td>
-                <td>${fmtUsd(r.buyUsd)}</td>
-                <td class="yellow">${fmtUsd(r.profitUsd)}</td>
-                ${isAdmin ? `
-                  <td style="display:flex;gap:8px">
-                    <button class="btn-mini" onclick="editProfitProduct(${r._row})">✎</button>
-                    <button class="btn-mini" style="border-color:#ef4444;color:#f87171" onclick="deleteProfitProduct(${r._row})">🗑</button>
-                  </td>
-                ` : ''}
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
+      <div class="profit-compact-grid">
+  ${rows.map(r => `
+    <div class="profit-card-mini">
+      <div class="profit-mini-top">
+        <img class="game-icon" src="${gameIcon(r.game)}" alt="${esc(r.game)}">
+        <div class="profit-mini-name">${esc(r.product || 'Без назви')}</div>
       </div>
+
+      <div class="profit-mini-price">${fmtRub(r.sell)}</div>
+
+      <div class="profit-mini-row">
+        <span>Закуп</span>
+        <b>${fmtUsd(r.buyUsd)}</b>
+      </div>
+
+      <div class="profit-mini-row profit-mini-profit">
+        <span>Прибуток</span>
+        <b>${fmtUsd(r.profitUsd)}</b>
+      </div>
+
+      ${isAdmin ? `
+        <div class="profit-mini-actions">
+          <button class="btn-mini" onclick="editProfitProduct(${r._row})">✎</button>
+          <button class="btn-mini" style="border-color:#ef4444;color:#f87171" onclick="deleteProfitProduct(${r._row})">🗑</button>
+        </div>
+      ` : ''}
+    </div>
+  `).join('')}
+</div>
     </div>
   `;
 }
