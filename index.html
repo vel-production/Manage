@@ -2834,16 +2834,16 @@ async function enterAsWorker() {
    statsRows = parseCSV(await rS.text());
   const profitRaw = parseCSV(await rP.text());
 
-profitRows = profitRaw.map((r, i) => {
+profitRows = parseCSV(await rP.text()).map((r, i) => {
   const vals = Object.values(r);
 
   return {
     _row: i,
-    game: String(vals[0] || r.game || '').trim(),
-    product: String(vals[1] || r.product || '').trim(),
-    sell_rub: String(vals[2] || r.sell_rub || '').trim(),
-    buy_usd: String(vals[3] || r.buy_usd || '').trim(),
-    match: String(vals[4] || r.match || '').trim()
+    game: String(vals[0] || '').trim(),
+    product: String(vals[1] || '').trim(),
+    sell_rub: String(vals[2] || '').trim(),
+    buy_usd: String(vals[3] || '').trim(),
+    match: String(vals[4] || '').trim()
   };
 });
 
@@ -3245,7 +3245,7 @@ ${isAdmin ? `
           <tbody>
             ${rows.map(r => `
               <tr>
-                <td><b>${esc(r.product || r.match || r.game || 'Без назви')}</b></td>
+                <td><b>${esc(r.product || 'Без назви')}</b></td>
                 <td>${fmtRub(r.sell)}</td>
                 <td>${fmtUsd(r.buyUsd)}</td>
                 <td class="yellow">${fmtUsd(r.profitUsd)}</td>
