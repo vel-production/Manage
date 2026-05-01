@@ -2687,6 +2687,40 @@ body.profit-mode .profit-stat b {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }  
+.profit-mini-icon-wrap {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 10px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.profit-mini-icon {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 0 14px #ffffff66);
+}
+
+.profit-mini-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.profit-mini-name {
+  width: 100%;
+  text-align: center;
+}
+
+.profit-mini-price {
+  text-align: center;
+} 
   </style>
 </head>
 <body>   
@@ -3396,8 +3430,8 @@ function fixedFee(sell) {
   return 99;
 }
 
-function fmtRub(v) {
-  return Math.round(Number(v || 0)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₽';
+function fmtRubNoZero(v) {
+  return Math.round(v).toLocaleString('ru-RU') + ' ₽';
 }
 
 function fmtUsd(v) {
@@ -3433,10 +3467,9 @@ function getProfitIcon(game) {
   if (g.includes('brawl')) return 'brawlstars.png';
   if (g.includes('clash of clans')) return 'clashofclans.png';
   if (g.includes('fc')) return 'fcmobile.png';
-  if (g.includes('apps')) return 'appstore.png';
 
-  return 'favicon.png';
-}    
+  return 'app.png';
+}
 
 function renderProfit() {
   const el = document.getElementById('cards');
@@ -3509,11 +3542,14 @@ function renderProfit() {
           ${rows.map(r => `
             <div class="profit-card">
               <div class="profit-card-top">
-                <img class="profit-game-icon" src="${getProfitIcon(r.game)}" alt="">
+                <div class="profit-icon-box">
+                  <img class="profit-game-icon" src="${getProfitIcon(r.game)}" alt="">
+                </div>
+
                 <div class="profit-product-name">${esc(r.product || 'Без назви')}</div>
               </div>
 
-              <div class="profit-price">${fmtRub(r.sell)}</div>
+              <div class="profit-price">${fmtRubNoZero(r.sell)}</div>
 
               <div class="profit-card-info">
                 <div class="profit-card-row">
