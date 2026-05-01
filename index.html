@@ -2076,6 +2076,46 @@
 
 .profit-table .yellow {
   color: #facc15;
+}
+.profit-rate-panel {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(160px, 220px));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.profit-rate-card {
+  background: #ffffff08;
+  border: 1px solid #ffffff16;
+  border-radius: 16px;
+  padding: 14px 16px;
+}
+
+.profit-rate-card span {
+  display: block;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.profit-rate-card b {
+  color: #facc15;
+  font-size: 26px;
+  font-weight: 900;
+}
+
+.profit-rate-card small {
+  display: block;
+  margin-top: 4px;
+  color: #8b5cf6;
+  font-weight: 800;
+}
+
+.profit-rate-card.editable {
+  cursor: pointer;
+  border-color: #8b5cf680;
+  box-shadow: 0 0 18px #8b5cf622;
 }    
   </style>
 </head>
@@ -2634,20 +2674,38 @@ return;
    function renderChips() {
   const c = document.getElementById('chips');
 
+  if (currentTab === 'profit') {
+    const games = [...new Set(profitRows.map(r => r.game).filter(Boolean))];
+
+    if (profitGame === 'all' && games.length) {
+      profitGame = games[0];
+    }
+
+    c.innerHTML = games.map(g => `
+      <button class="chip${profitGame === g ? ' active' : ''}" onclick="profitGame='${esc(g)}';render()">
+        ${esc(g)}
+      </button>
+    `).join('');
+
+    return;
+  }
+
   if (currentTab === 'accounts') {
     c.innerHTML = ['all', 'xbox', 'itunes'].map(v => `
       <button class="chip${filterType === v ? ' active' : ''}" onclick="filterType='${v}';render()">
         ${v === 'all' ? 'Всі' : v === 'xbox' ? 'Xbox' : 'App Store'}
       </button>
     `).join('');
-  } else {
-    c.innerHTML = `
-      <button class="chip chip-all${filterUsed === 'all' ? ' active' : ''}" onclick="filterUsed='all';render()">Всі</button>
-      <button class="chip chip-active${filterUsed === 'active' ? ' active' : ''}" onclick="filterUsed='active';render()">✓ Активні</button>
-      <button class="chip chip-used${filterUsed === 'used' ? ' active' : ''}" onclick="filterUsed='used';render()">✕ Використані</button>
-      <button class="chip chip-today${filterUsed === 'today' ? ' active' : ''}" onclick="filterUsed='today';render()">📅 За день</button>
-    `;
+
+    return;
   }
+
+  c.innerHTML = `
+    <button class="chip chip-all${filterUsed === 'all' ? ' active' : ''}" onclick="filterUsed='all';render()">Всі</button>
+    <button class="chip chip-active${filterUsed === 'active' ? ' active' : ''}" onclick="filterUsed='active';render()">✓ Активні</button>
+    <button class="chip chip-used${filterUsed === 'used' ? ' active' : ''}" onclick="filterUsed='used';render()">✕ Використані</button>
+    <button class="chip chip-today${filterUsed === 'today' ? ' active' : ''}" onclick="filterUsed='today';render()">📅 За день</button>
+  `;
 }
 
 function render() {
@@ -2760,11 +2818,23 @@ function renderProfit() {
   el.innerHTML = `
     <div class="profit-box">
       <div class="profit-head">
-        <div>
-          <div class="profit-title">💰 Таблиця прибутку</div>
-          <div class="profit-sub">Курс Accounts: ${accountRate} · Курс Playerok: ${playerokRate}</div>
-        </div>
+  <div>
+    <div class="profit-title">💰 Таблиця прибутку</div>
+
+    <div class="profit-rate-panel">
+      <div class="profit-rate-card">
+        <span>Курс Accounts</span>
+        <b>${accountRate}</b>
       </div>
+
+      <div class="profit-rate-card editable" onclick="editPlayerokRate()">
+        <span>Курс Playerok</span>
+        <b>${playerokRate}</b>
+        <small>натисни щоб змінити</small>
+      </div>
+    </div>
+  </div>
+</div>
 
       <div class="profit-table-wrap">
         <table class="profit-table">
@@ -2799,6 +2869,14 @@ function renderProfit() {
     </div>
   `;
 }
+
+function editPlayerokRate() {
+  const value = prompt('Введи курс Playerok:', String(playerokRate).replace('.', ','));
+  if (!value) return;
+
+  playerokRate = num(value);
+  render();
+}    
 
 function getCurrentAccountRate() {
   const xbox = accounts.find(a => String(a.type || '').toLowerCase() === 'xbox' && a.rate);
