@@ -2023,8 +2023,13 @@
 }
 
 .profit-head {
-  padding: 18px 20px;
+  padding: 18px 24px 14px;
   border-bottom: 1px solid #ffffff12;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
 }
 
 .profit-title {
@@ -2210,6 +2215,56 @@ body.profit-mode .tabs {
 
 .profit-rate-panel {
   margin-top: 18px;
+}   
+.profit-box {
+  margin-top: 0 !important;
+}
+
+.profit-rate-panel {
+  display: flex;
+  gap: 12px;
+  margin-top: 0;
+}
+
+.profit-rate-card {
+  min-width: 150px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: #7c3aed14;
+  border: 1px solid #8b5cf666;
+}
+
+.profit-rate-card span {
+  display: block;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.profit-rate-card b {
+  display: block;
+  margin-top: 4px;
+  color: #facc15;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.profit-rate-card button {
+  margin-top: 2px;
+  background: transparent;
+  border: none;
+  color: #a78bfa;
+  font-weight: 900;
+  padding: 0;
+}
+
+.profit-table th,
+.profit-table td {
+  padding: 10px 14px;
+}
+
+.profit-title {
+  font-size: 26px;
 }    
   </style>
 </head>
@@ -2930,19 +2985,20 @@ function renderProfit() {
       <div class="profit-head">
   <div>
     <div class="profit-title">💸 Profit Board</div>
+    <div class="profit-sub">Автоматичний розрахунок маржі з ProfitProducts</div>
+  </div>
 
-    <div class="profit-rate-panel">
-      <div class="profit-rate-card editable" onclick="openRateModal('accounts')">
-  <span>Курс Accounts</span>
-  <b>${accountRate}</b>
-  <small>змінити</small>
-</div>
+  <div class="profit-rate-panel">
+    <div class="profit-rate-card">
+      <span>Курс Accounts</span>
+      <b>${accountRate}</b>
+      <button onclick="editAccountRate()">змінити</button>
+    </div>
 
-<div class="profit-rate-card editable" onclick="openRateModal('playerok')">
-  <span>Курс Playerok</span>
-  <b>${playerokRate}</b>
-  <small>змінити</small>
-</div>
+    <div class="profit-rate-card">
+      <span>Курс Playerok</span>
+      <b>${playerokRate}</b>
+      <button onclick="editPlayerokRate()">змінити</button>
     </div>
   </div>
 </div>
