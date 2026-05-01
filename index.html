@@ -3150,8 +3150,6 @@ function renderProfit() {
       </div>
     </div>
 
-    ${customOrder ? customOrderBox(accountRate, playerokRate) : ''}
-
     <div class="profit-box">
       <div class="profit-head">
         <div>
@@ -3306,13 +3304,47 @@ function saveProfitProduct(oldMatch) {
 }
 
 function openCustomOrder() {
-  customOrder = {
-    sell: '',
-    buy: '',
-    name: ''
-  };
-  render();
+  document.getElementById('modal-title').textContent = '';
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="rate-modal">
+      <div class="rate-modal-icon">⚡</div>
+      <div class="rate-modal-title">Індивідуальний заказ</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <input class="rate-modal-input" id="custom-sell" placeholder="Продажа ₽" oninput="calcCustomModal()">
+        <input class="rate-modal-input" id="custom-buy-usd" placeholder="Закуп $" oninput="calcCustomModal()">
+      </div>
+
+      <div class="custom-result" style="margin-top:18px">
+        <div><span>Закуп</span><b id="m-buy">0,00 ₽</b></div>
+        <div><span>Комісія</span><b class="bad" id="m-com">19,00 ₽</b></div>
+        <div><span>Чистий прибуток</span><b class="good" id="m-profit">-19,00 ₽</b></div>
+        <div><span>В $</span><b class="yellow" id="m-usd">$-0,24</b></div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('modal').style.display = 'flex';
 }
+
+function calcCustomModal() {
+  const sell = num(document.getElementById('custom-sell').value);
+  const buyUsd = num(document.getElementById('custom-buy-usd').value);
+
+  const accountRate = getCurrentAccountRate();
+  const playerokRate = getPlayerokRate();
+
+  const buyRub = buyUsd * accountRate * playerokRate;
+  const commission = sell * 0.14 + fixedFee(sell);
+  const profitRub = sell - commission - buyRub;
+  const profitUsd = profitRub / playerokRate;
+
+  document.getElementById('m-buy').textContent = fmtRub(buyRub);
+  document.getElementById('m-com').textContent = fmtRub(commission);
+  document.getElementById('m-profit').textContent = fmtRub(profitRub);
+  document.getElementById('m-usd').textContent = fmtUsd(profitUsd);
+}    
 
 function closeCustomOrder() {
   customOrder = null;
