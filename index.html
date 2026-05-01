@@ -2968,7 +2968,7 @@ return;
     const games = [...new Set(profitRows.map(r => r.game).filter(Boolean))];
 
     c.innerHTML = games.map(game => `
-      <button class="chip${profitGame === game ? ' active' : ''}" onclick="profitGame='${esc(game)}';render()">
+      <button class="chip${profitGame === game ? ' active' : ''}" onclick="setProfitGame('${esc(game)}')">
         ${esc(game)}
       </button>
     `).join('');
@@ -2992,6 +2992,11 @@ return;
     <button class="chip chip-today${filterUsed === 'today' ? ' active' : ''}" onclick="filterUsed='today';render()">📅 За день</button>
   `;
 }
+
+function setProfitGame(game) {
+  profitGame = game;
+  render();
+}    
 
 function render() {
       renderChips();
