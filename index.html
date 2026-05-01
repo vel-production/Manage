@@ -2547,7 +2547,7 @@ body.profit-mode .tabs {
   <script>
     const SHEET_ID = '1-yF9f9LepfGBpg1fyhewTcgT7oePscPEScD9v-8Ggn4';
     const API_URL = 'https://script.google.com/macros/s/AKfycbx2DQNK3G8miYS2k0bm1xgCdoiAgHa-hKJVJ43CJhls-I8tp1r32qAPZDSVaHgYlavdcA/exec';
-    const POLL_MS = 15000;
+    const POLL_MS = 0;
 
     const CATEGORIES = ['Spotify', 'Claude', 'ChatGPT', 'Grok'];
 
@@ -2566,8 +2566,8 @@ body.profit-mode .tabs {
     let filterUsed = 'all';
     let filterCategory = 'all';
     let profitGame = 'Roblox';
-    let accountRateManual = 0.783;
-    let playerokRate = 80.36;
+    let accountRateManual = Number(localStorage.getItem('accountRateManual') || '0.783');
+    let playerokRate = Number(localStorage.getItem('playerokRate') || '80.36');
     let editId = null;
     let customOrder = null;
     let pollTimer = null;
@@ -2718,7 +2718,6 @@ async function enterAsWorker() {
   loadData();
 
   clearInterval(pollTimer);
-  pollTimer = setInterval(loadData, POLL_MS);
 }
 
     function parseCSV(text) {
@@ -3298,7 +3297,7 @@ function openCustomOrder() {
 
   document.getElementById('modal-body').innerHTML = `
     <div class="rate-modal">
-      <div class="rate-modal-icon">⚡</div>
+      <div class="rate-modal-icon">💼</div>
       <div class="rate-modal-title">Індивідуальний заказ</div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
@@ -3306,12 +3305,17 @@ function openCustomOrder() {
         <input class="rate-modal-input" id="custom-buy-usd" placeholder="Закуп $" oninput="calcCustomModal()">
       </div>
 
-      <div class="custom-result" style="margin-top:18px">
-        <div><span>Закуп</span><b id="m-buy">0,00 ₽</b></div>
-        <div><span>Комісія</span><b class="bad" id="m-com">19,00 ₽</b></div>
-        <div><span>Чистий прибуток</span><b class="good" id="m-profit">-19,00 ₽</b></div>
-        <div><span>В $</span><b class="yellow" id="m-usd">$-0,24</b></div>
-      </div>
+      <div class="custom-result" style="grid-template-columns:1fr 1fr;margin-top:18px">
+  <div>
+    <span>Закуп $</span>
+    <b id="m-buy-usd">$0,00</b>
+  </div>
+
+  <div>
+    <span>Прибуток $</span>
+    <b class="yellow" id="m-usd">$0,00</b>
+  </div>
+</div>
     </div>
   `;
 
@@ -3330,10 +3334,8 @@ function calcCustomModal() {
   const profitRub = sell - commission - buyRub;
   const profitUsd = profitRub / playerokRate;
 
-  document.getElementById('m-buy').textContent = fmtRub(buyRub);
-  document.getElementById('m-com').textContent = fmtRub(commission);
-  document.getElementById('m-profit').textContent = fmtRub(profitRub);
-  document.getElementById('m-usd').textContent = fmtUsd(profitUsd);
+  document.getElementById('m-buy-usd').textContent = fmtUsd(buyUsd);
+document.getElementById('m-usd').textContent = fmtUsd(profitUsd);
 }    
 
 function closeCustomOrder() {
@@ -3446,10 +3448,12 @@ function saveRateModal(type) {
   }
 
   if (type === 'accounts') {
-    accountRateManual = value;
-  } else {
-    playerokRate = value;
-  }
+  accountRateManual = value;
+  localStorage.setItem('accountRateManual', value);
+} else {
+  playerokRate = value;
+  localStorage.setItem('playerokRate', value);
+}
 
   closeModal();
   render();
