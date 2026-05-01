@@ -2773,10 +2773,11 @@ async function enterAsWorker() {
         const obj = {};
 
         headers.forEach((h, i) => {
-          obj[h.trim()] = (vals[i] || '').trim();
+        obj[h.trim()] = (vals[i] || '').trim();
         });
 
-        return obj;
+        obj.__cells = vals;
+      return obj;
       }).filter(r => Object.values(r).some(v => v));
     }
 
@@ -2842,15 +2843,15 @@ async function loadData() {
     statsRows = statsRaw;
 
     profitRows = profitRaw.map((r, i) => {
-  const vals = Object.values(r);
+  const v = r.__cells || [];
 
   return {
     _row: i,
-    game: String(r.game || vals[0] || '').trim(),
-    product: String(r.product || vals[1] || '').trim(),
-    sell_rub: String(r.sell_rub || vals[2] || '').trim(),
-    buy_usd: String(r.buy_usd || vals[3] || '').trim(),
-    match: String(r.match || vals[4] || '').trim()
+    game: String(v[0] || '').trim(),
+    product: String(v[1] || '').trim(),
+    sell_rub: String(v[2] || '').trim(),
+    buy_usd: String(v[3] || '').trim(),
+    match: String(v[4] || '').trim()
   };
 });
 
