@@ -3,25 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>PixelDrop Vault</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  
-  <link rel="icon" type="image/png" sizes="32x32" href="./favicon.png?v=4">
-  <link rel="shortcut icon" type="image/png" href="./favicon.png?v=4">
-  <link rel="apple-touch-icon" sizes="180x180" href="./favicon.png?v=4">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="./style.css?v=1">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.png?v=4">
+  <link rel="shortcut icon" type="image/png" href="favicon.png?v=4">
+  <link rel="apple-touch-icon" sizes="180x180" href="favicon.png?v=4">
+
+  <link rel="stylesheet" href="style.css?v=10">
 </head>
-<body>   
+
+<body>
   <div id="toast"></div>
-  <div id="login-screen">
-    <div class="login-card fade">
+
+  <section id="login-screen">
+    <div class="login-card">
       <div class="login-avatar">
-        <img src="avatar.png" alt="PixelDrop avatar" />
+        <img src="avatar.png" alt="PixelDrop avatar">
       </div>
 
-      <h2 class="brand-title">PixelDrop Vault</h2>
+      <h1 class="brand-title">PixelDrop Vault</h1>
       <p>Xbox · App Store · CDK</p>
 
       <div class="login-section">
@@ -32,12 +37,9 @@
             type="password"
             id="pw-input"
             placeholder="Пароль Власника"
-            onkeydown="if(event.key==='Enter')tryLogin()"
-          />
-
-          <button class="pass-toggle" onclick="togglePw('pw-input',this)">
-            👁
-          </button>
+            onkeydown="if(event.key === 'Enter') tryLogin()"
+          >
+          <button class="pass-toggle" onclick="togglePw('pw-input', this)">👁</button>
         </div>
 
         <div class="err-msg" id="pw-err" style="display:none">
@@ -50,21 +52,22 @@
       </div>
 
       <div class="worker-login">
-  <input class="worker-input" id="worker-name" placeholder="Нік працівника">
-  <input class="worker-input" id="worker-pass" type="password" placeholder="Пароль працівника">
-  <button class="btn-worker" onclick="enterAsWorker()">
-    Увійти як працівник
-  </button>
+        <input class="worker-input" id="worker-name" placeholder="Нік працівника">
+        <input class="worker-input" id="worker-pass" type="password" placeholder="Пароль працівника">
+
+        <button class="btn-worker" onclick="enterAsWorker()">
+          Увійти як працівник
+        </button>
+      </div>
     </div>
-    </div>
-  </div>
+  </section>
 
   <div id="app" style="display:none">
     <header>
       <div class="header-inner">
         <div class="logo">
           <div class="logo-icon">
-            <img src="avatar.png" alt="PixelDrop avatar" />
+            <img src="avatar.png" alt="PixelDrop avatar">
           </div>
 
           <div>
@@ -82,7 +85,7 @@
     </header>
 
     <main>
-      <div class="stats" id="top-stats">
+      <section class="stats" id="top-stats">
         <div class="stat-card">
           <div class="stat-val" id="s-acc" style="color:#818cf8">0</div>
           <div class="stat-lbl">Акаунти</div>
@@ -97,29 +100,38 @@
           <div class="stat-val" id="s-used-total" style="color:#f87171">0</div>
           <div class="stat-lbl">Використані всього</div>
         </div>
-      </div>
+      </section>
 
-      <div class="cat-stats" id="cat-stats"></div>
+      <section class="cat-stats" id="cat-stats"></section>
 
       <div class="sync-info" id="sync-info"></div>
 
-      <div class="tabs">
-  <button class="tab-btn active" id="tab-accounts" onclick="switchTab('accounts')">
-    👤 Акаунти
-  </button>
+      <nav class="tabs">
+        <button class="tab-btn active" id="tab-accounts" onclick="switchTab('accounts')">
+          👤 Акаунти
+        </button>
 
-  <button class="tab-btn" id="tab-cdks" onclick="switchTab('cdks')">
-    🔑 CDK Коди
-  </button>
+        <button class="tab-btn" id="tab-cdks" onclick="switchTab('cdks')">
+          🔑 CDK Коди
+        </button>
 
-  <button class="tab-btn" id="tab-profit" onclick="switchTab('profit')">
-    💸 Profit Board
-  </button>
-</div>
+        <button class="tab-btn" id="tab-profit" onclick="switchTab('profit')">
+          💸 Profit Board
+        </button>
+      </nav>
 
       <div class="toolbar">
         <div class="search-wrap">
-          <input type="text" id="search" placeholder="Пошук..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" oninput="render()" />
+          <input
+            type="text"
+            id="search"
+            placeholder="Пошук..."
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+            oninput="render()"
+          >
         </div>
 
         <button class="btn-add" id="btn-add" onclick="openAddModal()" style="display:none">
@@ -134,7 +146,7 @@
   </div>
 
   <div class="modal-overlay" id="modal" style="display:none" onclick="closeModal()">
-    <div class="modal-box fade" onclick="event.stopPropagation()">
+    <div class="modal-box" onclick="event.stopPropagation()">
       <div class="modal-header">
         <div class="modal-title" id="modal-title"></div>
         <button class="btn-close" onclick="closeModal()">✕</button>
@@ -144,6 +156,6 @@
     </div>
   </div>
 
- <script src="./script.js?v=1"></script>
+  <script src="script.js?v=10"></script>
 </body>
 </html>
