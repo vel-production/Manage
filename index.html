@@ -11,6 +11,156 @@
   <link rel="apple-touch-icon" sizes="180x180" href="./favicon.png?v=4">
 
   <style>
+    .acc-card-compact {
+  padding: 18px 20px;
+}
+
+.acc-compact-top {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto auto;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #ffffff12;
+}
+
+.acc-compact-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.acc-compact-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  object-fit: contain;
+}
+
+.acc-compact-title {
+  font-size: 21px;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.acc-compact-rate {
+  display: inline-flex;
+  margin-top: 6px;
+  padding: 5px 10px;
+  border-radius: 10px;
+  background: #f59e0b18;
+  border: 1px solid #f59e0b55;
+  color: #facc15;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.acc-compact-balance {
+  text-align: left;
+  min-width: 110px;
+}
+
+.acc-compact-balance span {
+  display: block;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.acc-compact-balance b {
+  color: #4ade80;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.acc-compact-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.acc-compact-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr 1.2fr;
+  gap: 0;
+}
+
+.acc-compact-field {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 12px;
+  border-right: 1px solid #ffffff10;
+}
+
+.acc-compact-field:last-child {
+  border-right: none;
+}
+
+.acc-compact-field span {
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.acc-compact-field b {
+  color: #f8fafc;
+  font-size: 15px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.acc-compact-field .btn-copy {
+  min-width: 42px;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  font-size: 0;
+  border-radius: 12px;
+}
+
+.acc-compact-field .btn-copy::before {
+  content: "⧉";
+  font-size: 22px;
+}
+
+@media (max-width: 768px) {
+  .acc-card-compact {
+    padding: 16px;
+  }
+
+  .acc-compact-top {
+    grid-template-columns: 1fr auto;
+  }
+
+  .acc-compact-balance {
+    grid-column: 1 / 2;
+  }
+
+  .acc-compact-actions {
+    grid-column: 2 / 3;
+    grid-row: 1 / 3;
+    align-self: center;
+  }
+
+  .acc-compact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .acc-compact-field {
+    grid-template-columns: 70px minmax(0, 1fr) auto auto;
+    border-right: none;
+    border-bottom: 1px solid #ffffff10;
+    padding: 14px 0;
+  }
+
+  .acc-compact-field:last-child {
+    border-bottom: none;
+  }
+}
     .worker-login {
   display: grid;
   gap: 10px;
@@ -2415,43 +2565,11 @@ function render() {
     }
 
     function accCard(a) {
-  const type = String(a.type || '').toLowerCase();
-  const isXbox = type === 'xbox';
-  const name = isXbox ? 'Xbox' : 'App Store';
-  const icon = isXbox ? 'Xbox.png' : 'Appstore.png';
-
-  const rows = [
-    a.login ? ['LOGIN', a.login, true] : null,
-    a.password ? ['PASS', '••••••••••••', true, a.password, a._id] : null,
-    a.link ? ['LINK', a.link, true] : null,
-    a.twofa ? ['2FA', a.twofa, true] : null,
-    a.note ? ['NOTE', a.note, false] : null
-  ].filter(Boolean);
-
-  const lines = rows.map(r => {
-    const [key, shown, canCopy, realValue, id] = r;
-
-    if (key === 'PASS') {
-      return `
-        <div class="account-line">
-          <div class="account-key">${key}</div>
-          <div class="account-value" id="pv-${id}">${shown}</div>
-          <div style="display:flex;gap:8px">
-            <button class="btn-icon btn-edit" onclick="toggleAccPass(${id},'${esc(realValue)}')">👁</button>
-            ${copyBtn(realValue)}
-          </div>
-        </div>
-      `;
-    }
-
-    return `
-      <div class="account-line">
-        <div class="account-key">${key}</div>
-        <div class="account-value">${esc(shown)}</div>
-        <div>${canCopy ? copyBtn(shown) : ''}</div>
-      </div>
-    `;
-  }).join('');
+  const xb = String(a.type || '').toLowerCase() === 'xbox';
+  const typeName = xb ? 'Xbox' : 'App Store';
+  const icon = xb ? 'Xbox.png' : 'Appstore.png';
+  const twofaOrLink = xb ? (a.twofa || '') : (a.link || '');
+  const twofaLabel = xb ? '2FA' : 'LINK';
 
   const adminBtns = isAdmin ? `
     <button class="btn-icon btn-edit" onclick="openEditAcc(${a._id})">${svgEdit}</button>
@@ -2459,28 +2577,54 @@ function render() {
   ` : '';
 
   return `
-    <div class="account-card-premium">
-      <div class="account-card-top">
-        <div class="account-brand">
-          <img src="${icon}" class="account-brand-icon" alt="${name}">
-          <div class="account-brand-name" style="color:${isXbox ? '#4ade80' : '#22d3ee'}">${name}</div>
+    <div class="acc-card acc-card-compact">
+      <div class="acc-compact-top">
+        <div class="acc-compact-brand">
+          <img src="${icon}" class="acc-compact-icon" alt="${typeName}">
+          <div>
+            <div class="acc-compact-title">${typeName}</div>
+            ${a.rate ? `<div class="acc-compact-rate">💰 ${esc(a.rate)}</div>` : ''}
+          </div>
         </div>
 
-        ${a.rate ? `<div class="account-rate">💰 ${esc(a.rate)}</div>` : ''}
+        <div class="acc-compact-balance">
+          <span>Баланс</span>
+          <b>$${esc(a.balance || '0')}</b>
+        </div>
 
-        ${a.balance ? `
-          <div class="account-balance-box">
-            <small>Баланс</small>
-            $${esc(a.balance)}
+        <div class="acc-compact-actions">
+          ${adminBtns}
+        </div>
+      </div>
+
+      <div class="acc-compact-grid">
+        ${a.login ? `
+          <div class="acc-compact-field">
+            <span>LOGIN</span>
+            <b>${esc(a.login)}</b>
+            ${copyBtn(a.login)}
           </div>
         ` : ''}
 
-        <div class="card-actions">${adminBtns}</div>
+        ${a.password ? `
+          <div class="acc-compact-field">
+            <span>PASS</span>
+            <b class="pass" id="pv-${a._id}">••••••••••••</b>
+            <button class="btn-eye" onclick="toggleAccPass(${a._id},'${esc(a.password)}')">👁</button>
+            ${copyBtn(a.password)}
+          </div>
+        ` : ''}
+
+        ${twofaOrLink ? `
+          <div class="acc-compact-field">
+            <span>${twofaLabel}</span>
+            <b>${esc(twofaOrLink)}</b>
+            ${copyBtn(twofaOrLink)}
+          </div>
+        ` : ''}
       </div>
 
-      <div class="account-card-body">
-        ${lines}
-      </div>
+      ${a.note ? `<div class="field-note">${esc(a.note)}</div>` : ''}
     </div>
   `;
 }
