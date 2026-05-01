@@ -2078,17 +2078,18 @@
   color: #facc15;
 }
 .profit-rate-panel {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(160px, 220px));
-  gap: 12px;
-  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
 }
 
 .profit-rate-card {
   background: #ffffff08;
   border: 1px solid #ffffff16;
-  border-radius: 16px;
-  padding: 14px 16px;
+  border-radius: 14px;
+  padding: 10px 14px;
+  min-width: 150px;
 }
 
 .profit-rate-card span {
@@ -2101,7 +2102,7 @@
 
 .profit-rate-card b {
   color: #facc15;
-  font-size: 26px;
+  font-size: 21px;
   font-weight: 900;
 }
 
@@ -2662,6 +2663,8 @@ return;
   'tab-btn' + (tab === 'profit' ? ' active' : '');
 
       document.getElementById('search').value = '';
+      document.getElementById('btn-add').style.display =
+      isAdmin && currentTab !== 'profit' ? 'flex' : 'none';
       filterType = 'all';
       filterUsed = 'all';
 
@@ -2794,10 +2797,10 @@ function renderProfit() {
   const q = document.getElementById('search').value.toLowerCase();
 
   const accountRate = getCurrentAccountRate();
-  const playerokRate = 80.36;
 
   const rows = profitRows.filter(r => {
-    return !q || ((r.game || '') + (r.product || '')).toLowerCase().includes(q);
+  if (profitGame !== 'all' && r.game !== profitGame) return false;
+  return !q || ((r.game || '') + (r.product || '')).toLowerCase().includes(q);
   }).map(r => {
     const sell = num(r.sell_rub);
     const buyUsd = num(r.buy_usd);
@@ -2832,7 +2835,7 @@ function renderProfit() {
       <div class="profit-rate-card editable" onclick="editPlayerokRate()">
         <span>Курс Playerok</span>
         <b>${playerokRate}</b>
-        <small>натисни щоб змінити</small>
+        <small>Змінити</small>
       </div>
     </div>
   </div>
@@ -2973,6 +2976,7 @@ function getCurrentAccountRate() {
   const el = document.getElementById('actions-bar');
 
   if (!el || !isAdmin || currentTab !== 'cdks') {
+    selected.clear();
     if (el) el.innerHTML = '';
     return;
   }
