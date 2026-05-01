@@ -157,6 +157,39 @@
   border-color: #22c55e66;
   color: #86efac;
 }
+.btn-eye {
+  min-width: 46px;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border-radius: 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  place-self: center;
+
+  background: #7c3aed18;
+  border: 1px solid #8b5cf680;
+  color: #c4b5fd;
+
+  line-height: 1;
+  box-shadow: 0 0 16px #8b5cf633;
+}
+
+.btn-eye:hover {
+  background: #8b5cf622;
+  border-color: #a78bfa;
+  color: #ede9fe;
+  box-shadow: 0 0 22px #8b5cf666;
+}
+
+.btn-eye svg {
+  width: 23px;
+  height: 23px;
+  display: block;
+  stroke: currentColor;
+}    
 
 @media (max-width: 768px) {
   .acc-card-compact {
@@ -2641,7 +2674,9 @@ function render() {
           <div class="acc-compact-field">
             <span>PASS</span>
             <b class="pass" id="pv-${a._id}">••••••••••••</b>
-            <button class="btn-eye" onclick="toggleAccPass(${a._id},'${esc(a.password)}')">👁</button>
+            <button class="btn-eye" onclick="toggleAccPass(${a._id},'${esc(a.password)}',this)">
+  ${eyeOffIcon}
+</button>
             ${copyBtn(a.password)}
           </div>
         ` : ''}
@@ -2660,18 +2695,20 @@ function render() {
   `;
 }
 
-    function toggleAccPass(id, pw) {
-      const el = document.getElementById('pv-' + id);
-      if (!el) return;
+    function toggleAccPass(id, pw, btn) {
+  const el = document.getElementById('pv-' + id);
+  if (!el) return;
 
-      if (el.classList.contains('show')) {
-        el.textContent = '••••••••••••';
-        el.classList.remove('show');
-      } else {
-        el.textContent = pw;
-        el.classList.add('show');
-      }
-    }
+  if (el.classList.contains('show')) {
+    el.textContent = '••••••••••••';
+    el.classList.remove('show');
+    if (btn) btn.innerHTML = eyeOffIcon;
+  } else {
+    el.textContent = pw;
+    el.classList.add('show');
+    if (btn) btn.innerHTML = eyeIcon;
+  }
+}
 
     
   function renderActions() {
@@ -3272,6 +3309,21 @@ if (!ok) return;
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
     }
+    const eyeIcon = `
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"></path>
+    <circle cx="12" cy="12" r="3"></circle>
+  </svg>
+`;
+
+const eyeOffIcon = `
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M3 3l18 18"></path>
+    <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"></path>
+    <path d="M9.9 4.2A10.6 10.6 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-4.1 5.1"></path>
+    <path d="M6.6 6.6A18.6 18.6 0 0 0 1 12s4 8 11 8a10.9 10.9 0 0 0 4.7-1"></path>
+  </svg>
+`;
 
     const svgEdit = `
       <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
