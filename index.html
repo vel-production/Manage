@@ -2602,7 +2602,10 @@ body.profit-mode .tabs {
     let filterUsed = 'all';
     let filterCategory = 'all';
     let profitGame = 'Roblox';
-    let accountRateManual = Number(localStorage.getItem('accountRateManual') || '0.783');
+    let accountRates = JSON.parse(localStorage.getItem('accountRates') || '{}');
+
+    if (!accountRates.default) accountRates.default = '0.783';
+    if (!accountRates.Roblox) accountRates.Roblox = accountRates.default;
     let playerokRate = Number(localStorage.getItem('playerokRate') || '80.36');
     let editId = null;
     let customOrder = null;
@@ -2828,10 +2831,11 @@ async function enterAsWorker() {
   used_by: c.used_by || ""
 }));
 
+   statsRows = parseCSV(await rS.text());
         profitRows = parseCSV(await rP.text()).map((r, i) => ({
   _row: i,
   game: r.game || r.Game || r['Гра'] || '',
-  product: r.product || r.Product || r['Товар'] || r['товар'] || '',
+  product: r.product || r.Product || r['Товар'] || r['товар'] || r['product '] || r[' Product'] || Object.values(r)[1] || '',
   sell_rub: r.sell_rub || r.sell || r['Продажа'] || r['Продажа ₽'] || '',
   buy_usd: r.buy_usd || r.buy || r['Закуп $'] || '',
   match: r.match || r.Match || r['Матч'] || ''
