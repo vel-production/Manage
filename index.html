@@ -3118,10 +3118,9 @@ function renderProfit() {
     return !q || ((r.product || '') + (r.match || '')).toLowerCase().includes(q);
   }).map(r => calcProfitRow(r, accountRate, playerokRate));
 
-  const dayRub = getSalesSum('profit_rub', 'day');
-  const monthRub = getSalesSum('profit_rub', 'month');
   const dayUsd = getSalesSum('profit_usd', 'day');
   const salesToday = getSalesCount('day');
+  const monthRub = getSalesSum('profit_rub', 'month');
 
   el.innerHTML = `
     <div class="profit-dashboard">
@@ -3178,20 +3177,27 @@ function renderProfit() {
               ${isAdmin ? '<th>Редагувати</th>' : ''}
             </tr>
           </thead>
+
           <tbody>
-            ${rows.map((r, idx) => `
+            ${rows.map(r => `
               <tr>
-                <tr>
                 <td><b>${esc(r.product)}</b></td>
                 <td>${fmtRub(r.sell)}</td>
                 <td>${fmtUsd(r.buyUsd)}</td>
                 <td class="yellow">${fmtUsd(r.profitUsd)}</td>
-                  ${isAdmin ? `
-              <td>
-      <button class="btn-mini" onclick="editProfitProduct('${esc(r.match)}')">✎</button>
-    </td>
-  ` : ''}
-</tr>
+                ${isAdmin ? `
+                  <td>
+                    <button class="btn-mini" onclick="editProfitProduct('${esc(r.match)}')">✎</button>
+                  </td>
+                ` : ''}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
 
 function calcProfitRow(r, accountRate, playerokRate) {
   const sell = num(r.sell_rub);
