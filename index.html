@@ -2586,7 +2586,104 @@ body.profit-mode .profit-stat b {
   body.profit-mode .profit-dashboard {
     grid-template-columns: repeat(2, 1fr);
   }
-}    
+}  
+  .profit-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.profit-card {
+  background: linear-gradient(145deg, #172061, #080d22);
+  border: 1px solid #ffffff18;
+  border-radius: 22px;
+  padding: 18px;
+  min-height: 220px;
+  box-shadow: inset 0 0 35px #ffffff08, 0 0 18px #0008;
+}
+
+.profit-card-top {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+}
+
+.profit-game-icon {
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+  border-radius: 16px;
+  filter: drop-shadow(0 0 14px #facc15aa);
+}
+
+.profit-product-name {
+  font-size: 22px;
+  font-weight: 900;
+  color: #fff;
+  text-align: center;
+  line-height: 1.1;
+  min-height: 28px;
+}
+
+.profit-price {
+  margin-top: 18px;
+  font-size: 36px;
+  font-weight: 900;
+  color: #facc15;
+  text-shadow: 0 0 16px #facc1588;
+}
+
+.profit-card-info {
+  margin-top: 14px;
+  display: grid;
+  gap: 4px;
+}
+
+.profit-card-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.profit-card-row span {
+  color: #cbd5e1;
+}
+
+.profit-card-row b {
+  color: #f8fafc;
+}
+
+.profit-card-row.profit b {
+  color: #22c55e;
+}
+
+.profit-card-actions {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.profit-card-actions .btn-mini {
+  height: 44px;
+}
+
+.profit-box .profit-table-wrap {
+  padding: 16px;
+}
+
+@media (max-width: 1000px) {
+  .profit-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 650px) {
+  .profit-grid {
+    grid-template-columns: 1fr;
+  }
+}  
   </style>
 </head>
 <body>   
@@ -3325,6 +3422,19 @@ function gameIcon(game) {
   return 'game.png';
 }    
 
+function getProfitIcon(game) {
+  const g = String(game || '').toLowerCase();
+
+  if (g.includes('roblox')) return 'roblox.png';
+  if (g.includes('clash royale')) return 'clashroyale.png';
+  if (g.includes('brawl')) return 'brawlstars.png';
+  if (g.includes('clash of clans')) return 'clashofclans.png';
+  if (g.includes('fc')) return 'fcmobile.png';
+  if (g.includes('apps')) return 'appstore.png';
+
+  return 'favicon.png';
+}    
+
 function renderProfit() {
   const el = document.getElementById('cards');
   const q = document.getElementById('search').value.toLowerCase();
@@ -3367,14 +3477,14 @@ function renderProfit() {
     <div class="profit-box">
       <div class="profit-head">
         <div>
-  <div class="profit-title">💸 Profit Board</div>
-</div>
+          <div class="profit-title">💸 Profit Board</div>
+        </div>
 
-${isAdmin ? `
-  <button class="btn-mini" onclick="openAddProfitProduct()">
-    ＋ Додати товар
-  </button>
-` : ''}
+        ${isAdmin ? `
+          <button class="btn-mini" onclick="openAddProfitProduct()">
+            ＋ Додати товар
+          </button>
+        ` : ''}
 
         <div class="profit-rate-panel">
           <div class="profit-rate-card">
@@ -3391,35 +3501,39 @@ ${isAdmin ? `
         </div>
       </div>
 
-      <div class="profit-compact-grid">
-  ${rows.map(r => `
-    <div class="profit-card-mini">
-      <div class="profit-mini-top">
-        <img class="game-icon" src="${gameIcon(r.game)}" alt="${esc(r.game)}">
-        <div class="profit-mini-name">${esc(r.product || 'Без назви')}</div>
-      </div>
+      <div class="profit-table-wrap">
+        <div class="profit-grid">
+          ${rows.map(r => `
+            <div class="profit-card">
+              <div class="profit-card-top">
+                <img class="profit-game-icon" src="${getProfitIcon(r.game)}" alt="">
+                <div class="profit-product-name">${esc(r.product || 'Без назви')}</div>
+              </div>
 
-      <div class="profit-mini-price">${fmtRub(r.sell)}</div>
+              <div class="profit-price">${fmtRub(r.sell)}</div>
 
-      <div class="profit-mini-row">
-        <span>Закуп</span>
-        <b>${fmtUsd(r.buyUsd)}</b>
-      </div>
+              <div class="profit-card-info">
+                <div class="profit-card-row">
+                  <span>Закуп</span>
+                  <b>${fmtUsd(r.buyUsd)}</b>
+                </div>
 
-      <div class="profit-mini-row profit-mini-profit">
-        <span>Прибуток</span>
-        <b>${fmtUsd(r.profitUsd)}</b>
-      </div>
+                <div class="profit-card-row profit">
+                  <span>Прибуток</span>
+                  <b>${fmtUsd(r.profitUsd)}</b>
+                </div>
+              </div>
 
-      ${isAdmin ? `
-        <div class="profit-mini-actions">
-          <button class="btn-mini" onclick="editProfitProduct(${r._row})">✎</button>
-          <button class="btn-mini" style="border-color:#ef4444;color:#f87171" onclick="deleteProfitProduct(${r._row})">🗑</button>
+              ${isAdmin ? `
+                <div class="profit-card-actions">
+                  <button class="btn-mini" onclick="editProfitProduct(${r._row})">✎</button>
+                  <button class="btn-mini" style="border-color:#ef4444;color:#f87171" onclick="deleteProfitProduct(${r._row})">🗑</button>
+                </div>
+              ` : ''}
+            </div>
+          `).join('')}
         </div>
-      ` : ''}
-    </div>
-  `).join('')}
-</div>
+      </div>
     </div>
   `;
 }
