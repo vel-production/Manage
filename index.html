@@ -2541,7 +2541,6 @@ body.profit-mode .tabs {
     let filterType = 'all';
     let filterUsed = 'all';
     let filterCategory = 'all';
-    let filterCategory = 'all';
     let profitGame = 'Roblox';
     let accountRateManual = 0.783;
     let playerokRate = 80.36;
@@ -3074,6 +3073,14 @@ function fmtRub(v) {
 function fmtUsd(v) {
   return '$' + v.toFixed(2).replace('.', ',');
 }
+
+function getSalesSum() {
+  return 0;
+}
+
+function getSalesCount() {
+  return 0;
+}    
 
 function renderProfit() {
   const el = document.getElementById('cards');
