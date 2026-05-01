@@ -2835,40 +2835,15 @@ async function enterAsWorker() {
   const profitRaw = parseCSV(await rP.text());
 
 profitRows = profitRaw.map((r, i) => {
-  const keys = Object.keys(r);
   const vals = Object.values(r);
 
   return {
     _row: i,
-    game: r.game || r.Game || r['Гра'] || vals[0] || '',
-    product:
-      r.product ||
-      r.Product ||
-      r['Товар'] ||
-      r['товар'] ||
-      r['Назва'] ||
-      r['name'] ||
-      vals[1] ||
-      '',
-    sell_rub:
-      r.sell_rub ||
-      r.sell ||
-      r['Продажа'] ||
-      r['Продажа ₽'] ||
-      vals[2] ||
-      '',
-    buy_usd:
-      r.buy_usd ||
-      r.buy ||
-      r['Закуп $'] ||
-      vals[3] ||
-      '',
-    match:
-      r.match ||
-      r.Match ||
-      r['Матч'] ||
-      vals[4] ||
-      ''
+    game: String(vals[0] || r.game || '').trim(),
+    product: String(vals[1] || r.product || '').trim(),
+    sell_rub: String(vals[2] || r.sell_rub || '').trim(),
+    buy_usd: String(vals[3] || r.buy_usd || '').trim(),
+    match: String(vals[4] || r.match || '').trim()
   };
 });
 
@@ -3270,7 +3245,7 @@ ${isAdmin ? `
           <tbody>
             ${rows.map(r => `
               <tr>
-                <td><b>${esc(r.product)}</b></td>
+                <td><b>${esc(r.product || r.match || r.game || 'Без назви')}</b></td>
                 <td>${fmtRub(r.sell)}</td>
                 <td>${fmtUsd(r.buyUsd)}</td>
                 <td class="yellow">${fmtUsd(r.profitUsd)}</td>
