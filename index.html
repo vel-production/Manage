@@ -3964,7 +3964,7 @@ function renderProfit() {
 
   const dayUsd = getSalesSum('profit_usd', 'day');
   const salesToday = getSalesCount('day');
-  const monthRub = getSalesSum('profit_rub', 'month');
+  const monthUsd = getSalesSum('profit_usd', 'month');
 
   el.innerHTML = `
     <div class="profit-dashboard">
@@ -3980,7 +3980,7 @@ function renderProfit() {
 
       <div class="profit-stat">
         <span>Прибуток за місяць</span>
-        <b>${fmtUsd(monthRub / playerokRate)}</b>
+        <b>${fmtUsd(monthUsd)}</b>
       </div>
 
       ${showCustomOrderBtn() ? `
