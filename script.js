@@ -286,10 +286,6 @@ async function loadData() {
     document.getElementById('sync-info').textContent = '⚠ Помилка завантаження — відкрий Console';
   }
 }
-
-    function getUsedTotal(category) {
-  return cdks.filter(c => c._used && c.category === category).length;
-}
     
 function getUsedTotal(category) {
   return statsRows
@@ -307,6 +303,14 @@ function getUsedToday(category) {
   return statsRows
     .filter(s => normalizeDate(s.date) === today && s.category === category)
     .reduce((sum, s) => sum + Number(s.used_count || 0), 0);
+}
+
+function todayLocal() {
+  const d = new Date();
+
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
 }
 
 function normalizeDate(value) {
@@ -638,24 +642,8 @@ function openUnmatchedSales() {
 }
 
 function getSalesRows(period = 'day') {
-  const now = new Date();
-  const today = now.toISOString().slice(0, 10);
-
-  return salesRows.filter(r => {
-    const d = normalizeDate(r.date);
-    if (!d) return false;
-
-    if (period === 'day') {
-      return d === today;
-    }
-
-    if (period === 'month') {
-      const rd = new Date(d + 'T00:00:00');
-      return rd.getFullYear() === now.getFullYear() &&
-             rd.getMonth() === now.getMonth();
-    }
-
-    return true;
+  return getSalesRowsRaw(period).filter(r => {
+    return String(r.matched || '').toUpperCase() !== 'NO' && num(r.profit_usd) !== 0;
   });
 }
 
