@@ -8,7 +8,7 @@ const SHEET_ID = '1-yF9f9LepfGBpg1fyhewTcgT7oePscPEScD9v-8Ggn4';
     const csvCdk = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=CDK`;
     const csvStats = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Stats`;
     const csvProfit = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=ProfitProducts`;
-    const csvSales = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Sales`;
+    const csvSales = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=SalesLog`;
 
     let salesRows = [];
     let isAdmin = false;
@@ -318,6 +318,11 @@ function normalizeDate(value) {
   const m = v.match(/Date\((\d+),(\d+),(\d+)\)/);
   if (m) {
     return `${m[1]}-${String(Number(m[2]) + 1).padStart(2, '0')}-${String(Number(m[3])).padStart(2, '0')}`;
+  }
+
+  const eu = v.match(/^(\d{2})\.(\d{2})\.(\d{4})/);
+  if (eu) {
+    return `${eu[3]}-${eu[2]}-${eu[1]}`;
   }
 
   return v;
