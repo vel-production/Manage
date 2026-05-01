@@ -2902,7 +2902,6 @@ function renderProfit() {
         <table class="profit-table">
           <thead>
             <tr>
-              <th>Гра</th>
               <th>Товар</th>
               <th>Закуп</th>
               <th>Продажа</th>
@@ -2915,7 +2914,6 @@ function renderProfit() {
           <tbody>
             ${rows.map(r => `
               <tr>
-                <td>${esc(r.game)}</td>
                 <td><b>${esc(r.product)}</b></td>
                 <td>${fmtRub(r.buyRub)}</td>
                 <td>${fmtRub(r.sell)}</td>
