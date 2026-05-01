@@ -3305,7 +3305,9 @@ body.profit-mode #cards {
     const csvCdk = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=CDK`;
     const csvStats = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Stats`;
     const csvProfit = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=ProfitProducts`;
+    const csvSales = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Sales`;
 
+    let salesRows = [];
     let isAdmin = false;
     let accounts = [];
     let cdks = [];
@@ -3535,11 +3537,12 @@ async function enterAsWorker() {
 
 async function loadData() {
   try {
-    const [accRaw, cdkRaw, statsRaw, profitRaw] = await Promise.all([
-      loadCSV(csvAcc),
-      loadCSV(csvCdk),
-      loadCSV(csvStats),
-      loadCSV(csvProfit)
+    const [accRaw, cdkRaw, statsRaw, profitRaw, salesRaw] = await Promise.all([
+        loadCSV(csvAcc),
+        loadCSV(csvCdk),
+        loadCSV(csvStats),
+        loadCSV(csvProfit),
+        loadCSV(csvSales)
     ]);
 
     accounts = accRaw.map((a, i) => ({ ...a, _id: i }));
@@ -3555,6 +3558,7 @@ async function loadData() {
     }));
 
     statsRows = statsRaw;
+    salesRows = salesRaw;
 
     profitRows = profitRaw.map((r, i) => {
   const vals = Object.values(r);
@@ -3878,13 +3882,36 @@ function fmtUsd(v) {
   return '$' + v.toFixed(2).replace('.', ',');
 }
 
-function getSalesSum() {
-  return 0;
+function getSalesRows(period = 'day') {
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+
+  return salesRows.filter(r => {
+    const d = normalizeDate(r.date);
+    if (!d) return false;
+
+    if (period === 'day') {
+      return d === today;
+    }
+
+    if (period === 'month') {
+      const rd = new Date(d + 'T00:00:00');
+      return rd.getFullYear() === now.getFullYear() &&
+             rd.getMonth() === now.getMonth();
+    }
+
+    return true;
+  });
 }
 
-function getSalesCount() {
-  return 0;
-}   
+function getSalesSum(field = 'profit_usd', period = 'day') {
+  return getSalesRows(period)
+    .reduce((sum, r) => sum + num(r[field]), 0);
+}
+
+function getSalesCount(period = 'day') {
+  return getSalesRows(period).length;
+}  
 
 function gameIcon(game) {
   const g = String(game || '').toLowerCase();
