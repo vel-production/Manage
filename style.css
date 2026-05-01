@@ -1,1 +1,265 @@
+:root {
+  --bg: #07090f;
+  --surface: #0d1117;
+  --surface2: #111827;
+  --border: #ffffff12;
+  --border2: #ffffff20;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --muted2: #64748b;
+  --accent: #6366f1;
+  --accent2: #8b5cf6;
+  --green: #22c55e;
+  --red: #ef4444;
+  --yellow: #facc15;
+  --font: "Inter", sans-serif;
+}
 
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 15px;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  overflow-x: hidden;
+}
+
+/* Background glow */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(600px at 10% 20%, #7c3aed22, transparent),
+    radial-gradient(500px at 90% 30%, #06b6d422, transparent),
+    radial-gradient(700px at 50% 100%, #9333ea22, transparent);
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: var(--font);
+}
+
+button {
+  cursor: pointer;
+  transition: .18s ease;
+}
+
+button:active {
+  opacity: .75;
+}
+
+/* HEADER */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 14px 20px;
+  background: #0d1117dd;
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+
+.header-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.logo-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.logo-title {
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* BUTTONS */
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  color: white;
+  font-weight: 700;
+}
+
+.btn-secondary {
+  background: #ffffff10;
+  border: 1px solid #ffffff20;
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #ddd;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: white;
+  font-weight: 700;
+}
+
+/* CARDS */
+.card,
+.stat-card,
+.cat-card,
+.acc-card,
+.cdk-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+/* GRID */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.cat-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+/* PROFIT */
+.profit-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+
+.profit-card {
+  height: 260px;
+  border-radius: 20px;
+  padding: 16px;
+  background: linear-gradient(145deg, #172061, #080d22);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profit-product-name {
+  font-size: 22px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.profit-price {
+  font-size: 34px;
+  color: var(--yellow);
+  font-weight: 900;
+}
+
+.profit-card-row {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-weight: 700;
+}
+
+.profit-card-row.profit b {
+  color: var(--green);
+}
+
+/* MODAL */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: #000c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-box {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 18px;
+  padding: 24px;
+  width: 100%;
+  max-width: 500px;
+}
+
+/* TOAST */
+#toast {
+  position: fixed;
+  right: 20px;
+  top: 90px;
+  display: grid;
+  gap: 10px;
+}
+
+.toast-msg {
+  background: #111827;
+  border: 1px solid #ffffff20;
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-weight: 700;
+}
+
+.toast-msg.ok {
+  color: #86efac;
+  border-color: #22c55e66;
+}
+
+.toast-msg.err {
+  color: #fca5a5;
+  border-color: #ef444466;
+}
+
+/* MOBILE */
+@media (max-width: 900px) {
+  .stats,
+  .cat-stats,
+  .profit-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .stats,
+  .cat-stats,
+  .profit-grid {
+    grid-template-columns: 1fr;
+  }
+}
