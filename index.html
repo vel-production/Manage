@@ -2843,23 +2843,15 @@ async function loadData() {
     statsRows = statsRaw;
 
     profitRows = profitRaw.map((r, i) => {
-  const vals = r._cells || Object.values(r);
+  const vals = Object.values(r);
 
   return {
     _row: i,
-    game: String(r.game || vals[0] || '').trim(),
-
-    product: String(
-      r.product ||
-      vals[1] ||
-      r.match ||
-      vals[4] ||
-      ''
-    ).trim(),
-
-    sell_rub: String(r.sell_rub || vals[2] || '').trim(),
-    buy_usd: String(r.buy_usd || vals[3] || '').trim(),
-    match: String(r.match || vals[4] || '').trim()
+    game: String(vals[0] || '').trim(),
+    product: String(vals[1] || '').trim(),
+    sell_rub: String(vals[2] || '').trim(),
+    buy_usd: String(vals[3] || '').trim(),
+    match: String(vals[4] || '').trim()
   };
 });
 
