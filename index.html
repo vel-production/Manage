@@ -2015,6 +2015,68 @@
 .modal-box::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, #8b5cf6, #a855f7);
 }  
+.profit-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.profit-head {
+  padding: 18px 20px;
+  border-bottom: 1px solid #ffffff12;
+}
+
+.profit-title {
+  font-size: 24px;
+  font-weight: 900;
+  color: #f8fafc;
+}
+
+.profit-sub {
+  margin-top: 6px;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.profit-table-wrap {
+  overflow-x: auto;
+}
+
+.profit-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+.profit-table th,
+.profit-table td {
+  padding: 13px 14px;
+  border-bottom: 1px solid #ffffff10;
+  text-align: left;
+  font-weight: 800;
+}
+
+.profit-table th {
+  color: #94a3b8;
+  background: #ffffff06;
+}
+
+.profit-table td {
+  color: #f8fafc;
+}
+
+.profit-table .bad {
+  color: #f87171;
+}
+
+.profit-table .good {
+  color: #4ade80;
+}
+
+.profit-table .yellow {
+  color: #facc15;
+}    
   </style>
 </head>
 <body>   
@@ -2116,6 +2178,10 @@
           🔑 CDK Коди
         </button>
       </div>
+              <button class="tab-btn" id="tab-profit" onclick="switchTab('profit')">
+          💰 Прибуток
+        </button>
+      </div>
 
       <div class="toolbar">
         <div class="search-wrap">
@@ -2154,11 +2220,13 @@
     const csvAcc = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Accounts`;
     const csvCdk = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=CDK`;
     const csvStats = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Stats`;
+    const csvProfit = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=ProfitProducts`;
 
     let isAdmin = false;
     let accounts = [];
     let cdks = [];
     let statsRows = [];
+    let profitRows = [];
     let currentTab = 'accounts';
     let filterType = 'all';
     let filterUsed = 'all';
@@ -2364,11 +2432,12 @@ async function enterAsWorker() {
 
     async function loadData() {
       try {
-        const [rA, rC, rS] = await Promise.all([
-          fetch(csvAcc + '&t=' + Date.now()),
-          fetch(csvCdk + '&t=' + Date.now()),
-          fetch(csvStats + '&t=' + Date.now())
-        ]);
+        const [rA, rC, rS, rP] = await Promise.all([
+  fetch(csvAcc + '&t=' + Date.now()),
+  fetch(csvCdk + '&t=' + Date.now()),
+  fetch(csvStats + '&t=' + Date.now()),
+  fetch(csvProfit + '&t=' + Date.now())
+]);
 
         accounts = parseCSV(await rA.text()).map((a, i) => ({
           ...a,
@@ -2386,6 +2455,7 @@ async function enterAsWorker() {
 }));
 
         statsRows = parseCSV(await rS.text());
+        profitRows = parseCSV(await rP.text());
 
         updateStats();
         render();
@@ -2546,6 +2616,9 @@ return;
       document.getElementById('tab-cdks').className =
         'tab-btn' + (tab === 'cdks' ? ' active' : '');
 
+      document.getElementById('tab-profit').className =
+  'tab-btn' + (tab === 'profit' ? ' active' : '');
+
       document.getElementById('search').value = '';
       filterType = 'all';
       filterUsed = 'all';
@@ -2581,8 +2654,13 @@ function render() {
       renderChips();
       renderActions();
 
-      const q = document.getElementById('search').value.toLowerCase();
+            const q = document.getElementById('search').value.toLowerCase();
       const el = document.getElementById('cards');
+
+      if (currentTab === 'profit') {
+        renderProfit();
+        return;
+      }
 
       if (currentTab === 'accounts') {
         let list = accounts.filter(a => {
@@ -2629,6 +2707,104 @@ function render() {
           : '<div class="empty">Кодів не знайдено</div>';
       }
     }
+
+    function num(v) {
+  return Number(String(v || '0').replace(',', '.').replace(/[^\d.-]/g, '')) || 0;
+}
+
+function fixedFee(sell) {
+  if (sell < 500) return 19;
+  if (sell < 1000) return 25;
+  if (sell < 2500) return 37;
+  if (sell < 5000) return 49;
+  if (sell < 10000) return 75;
+  return 99;
+}
+
+function fmtRub(v) {
+  return v.toFixed(2).replace('.', ',') + ' ₽';
+}
+
+function fmtUsd(v) {
+  return '$' + v.toFixed(2).replace('.', ',');
+}
+
+function renderProfit() {
+  const el = document.getElementById('cards');
+  const q = document.getElementById('search').value.toLowerCase();
+
+  const accountRate = getCurrentAccountRate();
+  const playerokRate = 80.36;
+
+  const rows = profitRows.filter(r => {
+    return !q || ((r.game || '') + (r.product || '')).toLowerCase().includes(q);
+  }).map(r => {
+    const sell = num(r.sell_rub);
+    const buyUsd = num(r.buy_usd);
+    const buyRub = buyUsd * accountRate * playerokRate;
+    const commission = sell * 0.14 + fixedFee(sell);
+    const profitRub = sell - commission - buyRub;
+    const profitUsd = profitRub / playerokRate;
+
+    return {
+      ...r,
+      sell,
+      buyUsd,
+      buyRub,
+      commission,
+      profitRub,
+      profitUsd
+    };
+  });
+
+  el.innerHTML = `
+    <div class="profit-box">
+      <div class="profit-head">
+        <div>
+          <div class="profit-title">💰 Таблиця прибутку</div>
+          <div class="profit-sub">Курс Accounts: ${accountRate} · Курс Playerok: ${playerokRate}</div>
+        </div>
+      </div>
+
+      <div class="profit-table-wrap">
+        <table class="profit-table">
+          <thead>
+            <tr>
+              <th>Гра</th>
+              <th>Товар</th>
+              <th>Закуп</th>
+              <th>Продажа</th>
+              <th>Комісія</th>
+              <th>Прибуток</th>
+              <th>Прибуток $</th>
+              <th>Закуп $</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map(r => `
+              <tr>
+                <td>${esc(r.game)}</td>
+                <td><b>${esc(r.product)}</b></td>
+                <td>${fmtRub(r.buyRub)}</td>
+                <td>${fmtRub(r.sell)}</td>
+                <td class="bad">${fmtRub(r.commission)}</td>
+                <td class="good">${fmtRub(r.profitRub)}</td>
+                <td class="yellow">${fmtUsd(r.profitUsd)}</td>
+                <td>${fmtUsd(r.buyUsd)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function getCurrentAccountRate() {
+  const xbox = accounts.find(a => String(a.type || '').toLowerCase() === 'xbox' && a.rate);
+  const any = accounts.find(a => a.rate);
+  return num((xbox || any || {}).rate || '0.790');
+}
 
     function accCard(a) {
   const xb = String(a.type || '').toLowerCase() === 'xbox';
