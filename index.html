@@ -2807,56 +2807,62 @@ async function enterAsWorker() {
       return result;
     }
 
-    async function loadData() {
-      try {
-        const [rA, rC, rS, rP] = await Promise.all([
-  fetch(csvAcc + '&t=' + Date.now()),
-  fetch(csvCdk + '&t=' + Date.now()),
-  fetch(csvStats + '&t=' + Date.now()),
-  fetch(csvProfit + '&t=' + Date.now())
-]);
+    async function loadCSV(url) {
+  try {
+    const r = await fetch(url + '&t=' + Date.now());
+    if (!r.ok) return [];
+    return parseCSV(await r.text());
+  } catch (e) {
+    console.error('CSV error:', url, e);
+    return [];
+  }
+}
 
-        accounts = parseCSV(await rA.text()).map((a, i) => ({
-          ...a,
-          _id: i
-        }));
+async function loadData() {
+  try {
+    const [accRaw, cdkRaw, statsRaw, profitRaw] = await Promise.all([
+      loadCSV(csvAcc),
+      loadCSV(csvCdk),
+      loadCSV(csvStats),
+      loadCSV(csvProfit)
+    ]);
 
-        cdks = parseCSV(await rC.text()).map((c, i) => ({
-  ...c,
-  _id: i,
-  _used: (c.used || "").toLowerCase() === "true" || c.used === "1",
-  category: c.category || "Spotify",
-  note: String(c.note || "").toLowerCase() === "false" ? "" : (c.note || ""),
-  used_at: c.used_at || "",
-  used_by: c.used_by || ""
-}));
+    accounts = accRaw.map((a, i) => ({ ...a, _id: i }));
 
-   statsRows = parseCSV(await rS.text());
-  const profitRaw = parseCSV(await rP.text());
+    cdks = cdkRaw.map((c, i) => ({
+      ...c,
+      _id: i,
+      _used: String(c.used || '').toLowerCase() === 'true' || c.used === '1',
+      category: c.category || 'Spotify',
+      note: String(c.note || '').toLowerCase() === 'false' ? '' : (c.note || ''),
+      used_at: c.used_at || '',
+      used_by: c.used_by || ''
+    }));
 
-profitRows = parseCSV(await rP.text()).map((r, i) => {
-  const vals = Object.values(r);
+    statsRows = statsRaw;
 
-  return {
-    _row: i,
-    game: String(r.game || vals[0] || '').trim(),
-    product: String(r.product || vals[1] || '').trim(),
-    sell_rub: String(r.sell_rub || vals[2] || '').trim(),
-    buy_usd: String(r.buy_usd || vals[3] || '').trim(),
-    match: String(r.match || vals[4] || '').trim()
-  };
-});
+    profitRows = profitRaw.map((r, i) => {
+      const vals = Object.values(r);
+      return {
+        _row: i,
+        game: String(r.game || vals[0] || '').trim(),
+        product: String(r.product || vals[1] || '').trim(),
+        sell_rub: String(r.sell_rub || vals[2] || '').trim(),
+        buy_usd: String(r.buy_usd || vals[3] || '').trim(),
+        match: String(r.match || vals[4] || '').trim()
+      };
+    });
 
-        updateStats();
-        render();
-        renderCategoryStats();
+    updateStats();
+    render();
+    renderCategoryStats();
 
-        document.getElementById('sync-info').textContent = '';
-      } catch (e) {
-        document.getElementById('sync-info').textContent =
-          '⚠ Помилка завантаження — перевір налаштування таблиці';
-      }
-    }
+    document.getElementById('sync-info').textContent = '';
+  } catch (e) {
+    console.error(e);
+    document.getElementById('sync-info').textContent = '⚠ Помилка завантаження — відкрий Console';
+  }
+}
 
     function getUsedTotal(category) {
   return cdks.filter(c => c._used && c.category === category).length;
