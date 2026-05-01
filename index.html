@@ -2117,7 +2117,56 @@
   cursor: pointer;
   border-color: #8b5cf680;
   box-shadow: 0 0 18px #8b5cf622;
-}    
+}
+ .rate-modal {
+  text-align: center;
+}
+
+.rate-modal-icon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 16px;
+  border-radius: 22px;
+  display: grid;
+  place-items: center;
+  font-size: 34px;
+  background: #8b5cf622;
+  border: 1px solid #8b5cf680;
+  box-shadow: 0 0 30px #8b5cf655;
+}
+
+.rate-modal-title {
+  font-size: 24px;
+  font-weight: 900;
+  color: #f8fafc;
+  margin-bottom: 18px;
+}
+
+.rate-modal-input {
+  width: 100%;
+  background: #07090f;
+  border: 1px solid #8b5cf680;
+  border-radius: 16px;
+  padding: 16px 18px;
+  color: #facc15;
+  font-size: 32px;
+  font-weight: 900;
+  text-align: center;
+  outline: none;
+  box-shadow: inset 0 0 18px #0008, 0 0 20px #8b5cf622;
+}
+
+.rate-modal-input:focus {
+  border-color: #c4b5fd;
+  box-shadow: 0 0 28px #8b5cf666;
+}
+
+.rate-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 22px;
+}   
   </style>
 </head>
 <body>   
@@ -2273,6 +2322,7 @@
     let filterUsed = 'all';
     let filterCategory = 'all';
     let profitGame = 'all';
+    let accountRateManual = 0.783;
     let playerokRate = 80.36;
     let editId = null;
     let pollTimer = null;
@@ -2560,6 +2610,12 @@ function normalizeDate(value) {
     function renderCategoryStats() {
   const wrap = document.getElementById('cat-stats');
 
+  if (currentTab === 'profit') {
+  wrap.style.display = 'none';
+  wrap.innerHTML = '';
+  return;
+}    
+
   if (currentTab === 'accounts') {
     wrap.style.display = 'grid';
 
@@ -2827,16 +2883,17 @@ function renderProfit() {
     <div class="profit-title">💰 Таблиця прибутку</div>
 
     <div class="profit-rate-panel">
-      <div class="profit-rate-card">
-        <span>Курс Accounts</span>
-        <b>${accountRate}</b>
-      </div>
+      <div class="profit-rate-card editable" onclick="openRateModal('accounts')">
+  <span>Курс Accounts</span>
+  <b>${accountRate}</b>
+  <small>змінити</small>
+</div>
 
-      <div class="profit-rate-card editable" onclick="editPlayerokRate()">
-        <span>Курс Playerok</span>
-        <b>${playerokRate}</b>
-        <small>Змінити</small>
-      </div>
+<div class="profit-rate-card editable" onclick="openRateModal('playerok')">
+  <span>Курс Playerok</span>
+  <b>${playerokRate}</b>
+  <small>змінити</small>
+</div>
     </div>
   </div>
 </div>
@@ -2875,18 +2932,59 @@ function renderProfit() {
   `;
 }
 
-function editPlayerokRate() {
-  const value = prompt('Введи курс Playerok:', String(playerokRate).replace('.', ','));
-  if (!value) return;
+function openRateModal(type) {
+  const isAcc = type === 'accounts';
+  const title = isAcc ? 'Курс Accounts' : 'Курс Playerok';
+  const current = isAcc ? accountRateManual : playerokRate;
 
-  playerokRate = num(value);
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = `
+    <div class="rate-modal">
+      <div class="rate-modal-icon">💱</div>
+      <div class="rate-modal-title">Змінити ${title}</div>
+      <input
+        class="rate-modal-input"
+        id="rate-input"
+        value="${String(current).replace('.', ',')}"
+        onkeydown="if(event.key==='Enter')saveRateModal('${type}')"
+        autofocus
+      >
+
+      <div class="rate-modal-actions">
+        <button class="btn-cancel" onclick="closeModal()">Скасувати</button>
+        <button class="btn-primary" style="width:auto" onclick="saveRateModal('${type}')">Зберегти</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('modal').style.display = 'flex';
+
+  setTimeout(() => {
+    const inp = document.getElementById('rate-input');
+    if (inp) inp.focus();
+  }, 50);
+}
+
+function saveRateModal(type) {
+  const value = num(document.getElementById('rate-input').value);
+
+  if (!value) {
+    toast('Введи правильний курс', 'err');
+    return;
+  }
+
+  if (type === 'accounts') {
+    accountRateManual = value;
+  } else {
+    playerokRate = value;
+  }
+
+  closeModal();
   render();
 }    
 
 function getCurrentAccountRate() {
-  const xbox = accounts.find(a => String(a.type || '').toLowerCase() === 'xbox' && a.rate);
-  const any = accounts.find(a => a.rate);
-  return num((xbox || any || {}).rate || '0.790');
+  return accountRateManual;
 }
 
     function accCard(a) {
