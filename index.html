@@ -2828,11 +2828,14 @@ async function enterAsWorker() {
   used_by: c.used_by || ""
 }));
 
-        statsRows = parseCSV(await rS.text());
         profitRows = parseCSV(await rP.text()).map((r, i) => ({
-        ...r,
-        _row: i
-      }));
+  _row: i,
+  game: r.game || r.Game || r['Гра'] || '',
+  product: r.product || r.Product || r['Товар'] || r['товар'] || '',
+  sell_rub: r.sell_rub || r.sell || r['Продажа'] || r['Продажа ₽'] || '',
+  buy_usd: r.buy_usd || r.buy || r['Закуп $'] || '',
+  match: r.match || r.Match || r['Матч'] || ''
+}));
 
         updateStats();
         render();
@@ -3531,7 +3534,7 @@ function customOrderBox(accountRate, playerokRate) {
 function openRateModal(type) {
   const isAcc = type === 'accounts';
   const title = isAcc ? 'Курс Accounts' : 'Курс Playerok';
-  const current = isAcc ? accountRateManual : playerokRate;
+  const current = isAcc ? getCurrentAccountRate() : playerokRate;
 
   document.getElementById('modal-title').textContent = title;
   document.getElementById('modal-body').innerHTML = `
@@ -3574,8 +3577,13 @@ function saveRateModal(type) {
   }
 
   if (type === 'accounts') {
-  accountRateManual = value;
-  localStorage.setItem('accountRateManual', value);
+  if (profitGame === 'Roblox') {
+    accountRates.Roblox = value;
+  } else {
+    accountRates.default = value;
+  }
+
+  localStorage.setItem('accountRates', JSON.stringify(accountRates));
 } else {
   playerokRate = value;
   localStorage.setItem('playerokRate', value);
@@ -3586,7 +3594,7 @@ function saveRateModal(type) {
 }    
 
 function getCurrentAccountRate() {
-  return accountRateManual;
+  return Number(accountRates[profitGame] || accountRates.default || '0.783');
 }
 
     function accCard(a) {
