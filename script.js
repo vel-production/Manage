@@ -553,8 +553,8 @@ function render() {
           if (!c._used) return false;
   if (!c.used_at) return false;
 
-  const today = new Date().toISOString().slice(0, 10);
-  if (!String(c.used_at).startsWith(today)) return false;
+  const today = todayLocal();
+  if (normalizeDate(c.used_at) !== today) return false;
 }
           if (filterCategory !== 'all' && c.category !== filterCategory) return false;
           if (!q) return true;
@@ -1311,8 +1311,8 @@ async function deleteFilteredCdks() {
     if (filterUsed === 'today') {
     if (!c.used_at) return false;
 
-  const today = new Date().toISOString().slice(0, 10);
-  if (!c.used_at.startsWith(today)) return false;
+  const today = todayLocal();
+  if (normalizeDate(c.used_at) !== today) return false;
 }
     if (filterCategory !== 'all' && c.category !== filterCategory) return false;
     return true;
