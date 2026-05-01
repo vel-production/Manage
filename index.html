@@ -120,15 +120,16 @@
   padding: 0;
   border-radius: 14px;
 
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
+  place-self: center;
 
   background: #7c3aed18;
   border: 1px solid #8b5cf680;
   color: #c4b5fd;
 
-  font-size: 0;
+  font-size: 22px;
   line-height: 1;
   box-shadow: 0 0 16px #8b5cf633;
 }
@@ -2896,7 +2897,7 @@ if (!ok) return;
 
     function copyText(text, btnEl) {
       navigator.clipboard.writeText(text).then(() => {
-        btnEl.innerHTML = '✓';
+        btnEl.innerHTML = '<span class="copy-check">✓</span>';
         btnEl.classList.add('ok');
 
         clearTimeout(copyTimers[text]);
