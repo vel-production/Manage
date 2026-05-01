@@ -2275,7 +2275,7 @@
 
       <div class="toolbar">
         <div class="search-wrap">
-          <input type="text" id="search" placeholder="Пошук..." oninput="render()" />
+          <input type="text" id="search" placeholder="Пошук..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" oninput="render()" />
         </div>
 
         <button class="btn-add" id="btn-add" onclick="openAddModal()" style="display:none">
@@ -2943,8 +2943,13 @@ function openRateModal(type) {
       <div class="rate-modal-icon">💱</div>
       <div class="rate-modal-title">Змінити ${title}</div>
       <input
+        <input
         class="rate-modal-input"
         id="rate-input"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
         value="${String(current).replace('.', ',')}"
         onkeydown="if(event.key==='Enter')saveRateModal('${type}')"
         autofocus
