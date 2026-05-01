@@ -2166,7 +2166,51 @@
   justify-content: center;
   gap: 12px;
   margin-top: 22px;
-}   
+}
+body.profit-mode main {
+  padding-top: 18px;
+}
+
+body.profit-mode #cat-stats {
+  display: none !important;
+}
+
+body.profit-mode .sync-info {
+  display: none;
+}
+
+body.profit-mode .toolbar {
+  margin-top: 0;
+  margin-bottom: 14px;
+}
+
+body.profit-mode .chips {
+  margin-bottom: 14px;
+}
+
+body.profit-mode .profit-box {
+  margin-top: 0;
+}
+
+body.profit-mode .tabs {
+  margin-bottom: 18px;
+}
+
+.profit-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.profit-head {
+  background:
+    radial-gradient(450px at 15% 20%, #8b5cf622, transparent),
+    radial-gradient(420px at 90% 10%, #06b6d422, transparent);
+}
+
+.profit-rate-panel {
+  margin-top: 18px;
+}    
   </style>
 </head>
 <body>   
@@ -2238,7 +2282,7 @@
     </header>
 
     <main>
-      <div class="stats">
+      <div class="stats" id="top-stats">
         <div class="stat-card">
           <div class="stat-val" id="s-acc" style="color:#818cf8">0</div>
           <div class="stat-lbl">Акаунти</div>
@@ -2268,9 +2312,10 @@
           🔑 CDK Коди
         </button>
       </div>
-              <button class="tab-btn" id="tab-profit" onclick="switchTab('profit')">
-          💰 Прибуток
+         <button class="tab-btn" id="tab-profit" onclick="switchTab('profit')">
+          💸 Profit Board
         </button>
+      </div>
       </div>
 
       <div class="toolbar">
@@ -2709,6 +2754,8 @@ return;
     function switchTab(tab, keepCategory = false) {
       currentTab = tab;
 
+      document.body.classList.toggle('profit-mode', tab === 'profit');
+
       document.getElementById('tab-accounts').className =
         'tab-btn' + (tab === 'accounts' ? ' active' : '');
 
@@ -2719,6 +2766,8 @@ return;
   'tab-btn' + (tab === 'profit' ? ' active' : '');
 
       document.getElementById('search').value = '';
+      document.getElementById('top-stats').style.display =
+      currentTab === 'profit' ? 'none' : 'grid';
       document.getElementById('btn-add').style.display =
       isAdmin && currentTab !== 'profit' ? 'flex' : 'none';
       filterType = 'all';
@@ -2880,7 +2929,7 @@ function renderProfit() {
     <div class="profit-box">
       <div class="profit-head">
   <div>
-    <div class="profit-title">💰 Таблиця прибутку</div>
+    <div class="profit-title">💸 Profit Board</div>
 
     <div class="profit-rate-panel">
       <div class="profit-rate-card editable" onclick="openRateModal('accounts')">
