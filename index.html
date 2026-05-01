@@ -2586,16 +2586,18 @@ function render() {
 
       if (currentTab === 'accounts') {
         let list = accounts.filter(a => {
-          if (filterType !== 'all' && (a.type || '').toLowerCase() !== filterType) return false;
-          if (!q) return true;
+  if (filterType !== 'all' && (a.type || '').toLowerCase() !== filterType) return false;
+  if (!q) return true;
 
-          return (
-            (a.login || '') +
-            (a.note || '') +
-            (a.rate || '') +
-            (a.type || '')
-          ).toLowerCase().includes(q);
-        });
+  return (
+    (a.login || '') +
+    (a.note || '') +
+    (a.rate || '') +
+    (a.type || '')
+  ).toLowerCase().includes(q);
+}).sort((a, b) => {
+  return moneyNum(b.balance) - moneyNum(a.balance);
+});
 
         el.innerHTML = list.length
           ? list.map(accCard).join('')
@@ -3012,6 +3014,14 @@ function openAccountForm(type) {
     type === 'xbox' ? 'Новий Xbox акаунт' : 'Новий App Store акаунт';
   document.getElementById('modal-body').innerHTML = accForm(null, type);
 }
+
+function moneyNum(value) {
+  return Number(
+    String(value || '0')
+      .replace(',', '.')
+      .replace(/[^\d.]/g, '')
+  ) || 0;
+}    
 
 function getAccountBalance(type) {
   return accounts
