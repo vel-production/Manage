@@ -2410,7 +2410,43 @@ body.profit-mode .tabs {
     opacity: 1;
     transform: scale(1) translateY(0);
   }
-}    
+}   
+ #cards {
+  animation: pageSoftIn .35s ease both;
+}
+
+.profit-dashboard,
+.profit-box {
+  animation: profitSlideIn .38s ease both;
+}
+
+.profit-dashboard {
+  animation-delay: .04s;
+}
+
+.profit-box {
+  animation-delay: .12s;
+}
+
+@keyframes pageSoftIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes profitSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}   
   </style>
 </head>
 <body>   
@@ -2546,7 +2582,7 @@ body.profit-mode .tabs {
 
   <script>
     const SHEET_ID = '1-yF9f9LepfGBpg1fyhewTcgT7oePscPEScD9v-8Ggn4';
-    const API_URL = 'https://script.google.com/macros/s/AKfycbx2DQNK3G8miYS2k0bm1xgCdoiAgHa-hKJVJ43CJhls-I8tp1r32qAPZDSVaHgYlavdcA/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzZtmcPHTcBlkcvLX7inaSM293DtswOMcFkxAYSBcKY5olpxJdqWtm5chCs4sd-eWSFOA/exec';
     const POLL_MS = 0;
 
     const CATEGORIES = ['Spotify', 'Claude', 'ChatGPT', 'Grok'];
@@ -2793,7 +2829,10 @@ async function enterAsWorker() {
 }));
 
         statsRows = parseCSV(await rS.text());
-        profitRows = parseCSV(await rP.text());
+        profitRows = parseCSV(await rP.text()).map((r, i) => ({
+        ...r,
+        _row: i
+      }));
 
         updateStats();
         render();
@@ -2977,8 +3016,15 @@ return;
         filterCategory = 'all';
       }
 
-      render();
-      renderCategoryStats();
+      const cards = document.getElementById('cards');
+if (cards) {
+  cards.style.animation = 'none';
+  cards.offsetHeight;
+  cards.style.animation = '';
+}
+
+render();
+renderCategoryStats();
     }
 
    function renderChips() {
@@ -3147,8 +3193,14 @@ function renderProfit() {
     <div class="profit-box">
       <div class="profit-head">
         <div>
-          <div class="profit-title">💸 Profit Board</div>
-        </div>
+  <div class="profit-title">💸 Profit Board</div>
+</div>
+
+${isAdmin ? `
+  <button class="btn-mini" onclick="editProfitProduct(${r._row})">✎</button>
+    ＋ Додати товар
+  </button>
+` : ''}
 
         <div class="profit-rate-panel">
           <div class="profit-rate-card">
@@ -3186,7 +3238,7 @@ function renderProfit() {
                 <td class="yellow">${fmtUsd(r.profitUsd)}</td>
                 ${isAdmin ? `
                   <td>
-                    <button class="btn-mini" onclick="editProfitProduct('${esc(r.match)}')">✎</button>
+                    <button class="btn-mini" onclick="editProfitProduct(${r._row})">✎</button>
                   </td>
                 ` : ''}
               </tr>
@@ -3242,13 +3294,84 @@ function saveRate(type) {
   render();
 }
 
-function editProfitProduct(match) {
-  const row = profitRows.find(r => String(r.match || '') === match);
+function openAddProfitProduct() {
+  document.getElementById('modal-title').textContent = 'Новий товар';
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="form-field">
+      <label class="form-label">Гра</label>
+      <input class="form-input" id="new-game" value="${esc(profitGame || '')}" placeholder="Roblox">
+    </div>
+
+    <div class="form-field">
+      <label class="form-label">Товар</label>
+      <input class="form-input" id="new-product" placeholder="Наприклад: 400 Robux">
+    </div>
+
+    <div class="form-field">
+      <label class="form-label">Продажа ₽</label>
+      <input class="form-input" id="new-sell" placeholder="199">
+    </div>
+
+    <div class="form-field">
+      <label class="form-label">Закуп $</label>
+      <input class="form-input" id="new-buy" placeholder="0.99">
+    </div>
+
+    <div class="form-field">
+      <label class="form-label">Match</label>
+      <input class="form-input" id="new-match" placeholder="400">
+    </div>
+
+    <div class="form-footer">
+      <button class="btn-cancel" onclick="closeModal()">Скасувати</button>
+      <button class="btn-primary" style="width:auto" onclick="saveNewProfitProduct()">Додати</button>
+    </div>
+  `;
+
+  document.getElementById('modal').style.display = 'flex';
+}    
+
+function saveNewProfitProduct() {
+  const game = document.getElementById('new-game').value.trim();
+  const product = document.getElementById('new-product').value.trim();
+  const sell = document.getElementById('new-sell').value.trim();
+  const buy = document.getElementById('new-buy').value.trim();
+  const match = document.getElementById('new-match').value.trim();
+
+  if (!game || !product || !sell || !buy || !match) {
+    toast('Заповни всі поля', 'err');
+    return;
+  }
+
+  profitRows.push({
+    game,
+    product,
+    sell_rub: sell,
+    buy_usd: buy,
+    match
+  });
+
+  profitGame = game;
+
+  closeModal();
+  render();
+  renderChips();
+  toast('Товар додано на сайті. В Google Sheets ще не записано.', 'ok');
+}    
+
+function editProfitProduct(rowIndex) {
+  const row = profitRows.find(r => r._row === rowIndex);
   if (!row) return;
 
   document.getElementById('modal-title').textContent = 'Редагувати товар';
 
   document.getElementById('modal-body').innerHTML = `
+    <div class="form-field">
+      <label class="form-label">Гра</label>
+      <input class="form-input" id="pp-game" value="${esc(row.game)}">
+    </div>
+
     <div class="form-field">
       <label class="form-label">Товар</label>
       <input class="form-input" id="pp-product" value="${esc(row.product)}">
@@ -3271,7 +3394,7 @@ function editProfitProduct(match) {
 
     <div class="form-footer">
       <button class="btn-cancel" onclick="closeModal()">Скасувати</button>
-      <button class="btn-primary" style="width:auto" onclick="saveProfitProduct('${esc(match)}')">Зберегти</button>
+      <button class="btn-primary" style="width:auto" onclick="saveProfitProduct(${rowIndex})">Зберегти</button>
     </div>
   `;
 
