@@ -2839,11 +2839,11 @@ profitRows = parseCSV(await rP.text()).map((r, i) => {
 
   return {
     _row: i,
-    game: String(vals[0] || '').trim(),
-    product: String(vals[1] || '').trim(),
-    sell_rub: String(vals[2] || '').trim(),
-    buy_usd: String(vals[3] || '').trim(),
-    match: String(vals[4] || '').trim()
+    game: String(r.game || vals[0] || '').trim(),
+    product: String(r.product || vals[1] || '').trim(),
+    sell_rub: String(r.sell_rub || vals[2] || '').trim(),
+    buy_usd: String(r.buy_usd || vals[3] || '').trim(),
+    match: String(r.match || vals[4] || '').trim()
   };
 });
 
@@ -3172,7 +3172,7 @@ function renderProfit() {
   const playerokRate = getPlayerokRate();
 
   const rows = profitRows.filter(r => {
-    if (profitGame && r.game !== profitGame) return false;
+    if (profitGame && String(r.game).trim() !== String(profitGame).trim()) return false;
     return !q || ((r.product || '') + (r.match || '')).toLowerCase().includes(q);
   }).map(r => calcProfitRow(r, accountRate, playerokRate));
 
