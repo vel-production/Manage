@@ -3127,26 +3127,22 @@ function renderProfit() {
     <div class="profit-dashboard">
       <div class="profit-stat">
         <span>Прибуток сьогодні</span>
-        <b>${fmtRub(dayRub)}</b>
-        <small>${fmtUsd(dayUsd)}</small>
+        <b>${fmtUsd(dayUsd)}</b>
       </div>
 
       <div class="profit-stat">
         <span>Продажів сьогодні</span>
         <b>${salesToday}</b>
-        <small>SalesLog</small>
       </div>
 
       <div class="profit-stat">
         <span>Прибуток за місяць</span>
-        <b>${fmtRub(monthRub)}</b>
-        <small>чистими</small>
+        <b>${fmtUsd(monthRub / playerokRate)}</b>
       </div>
 
       <div class="profit-stat profit-custom" onclick="openCustomOrder()">
         <span>Індивідуальний заказ</span>
-        <b>＋</b>
-        <small>рахувати вручну</small>
+        <b>🧾</b>
       </div>
     </div>
 
@@ -3176,38 +3172,26 @@ function renderProfit() {
           <thead>
             <tr>
               <th>Товар</th>
-              <th>Закуп</th>
               <th>Продажа</th>
-              <th>Комісія</th>
-              <th>Прибуток</th>
-              <th>Прибуток $</th>
               <th>Закуп $</th>
+              <th>Прибуток $</th>
               ${isAdmin ? '<th>Редагувати</th>' : ''}
             </tr>
           </thead>
           <tbody>
             ${rows.map((r, idx) => `
               <tr>
+                <tr>
                 <td><b>${esc(r.product)}</b></td>
-                <td>${fmtRub(r.buyRub)}</td>
                 <td>${fmtRub(r.sell)}</td>
-                <td class="bad">${fmtRub(r.commission)}</td>
-                <td class="good">${fmtRub(r.profitRub)}</td>
-                <td class="yellow">${fmtUsd(r.profitUsd)}</td>
                 <td>${fmtUsd(r.buyUsd)}</td>
-                ${isAdmin ? `
-                  <td>
-                    <button class="btn-mini" onclick="editProfitProduct('${esc(r.match)}')">✎</button>
-                  </td>
-                ` : ''}
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  `;
-}
+                <td class="yellow">${fmtUsd(r.profitUsd)}</td>
+                  ${isAdmin ? `
+              <td>
+      <button class="btn-mini" onclick="editProfitProduct('${esc(r.match)}')">✎</button>
+    </td>
+  ` : ''}
+</tr>
 
 function calcProfitRow(r, accountRate, playerokRate) {
   const sell = num(r.sell_rub);
@@ -3385,7 +3369,7 @@ function customOrderBox(accountRate, playerokRate) {
     <div class="custom-order-box">
       <button class="custom-x" onclick="closeCustomOrder()">✕</button>
 
-      <div class="custom-title">⚡ Індивідуальний заказ</div>
+      <div class="custom-title">🧾 Індивідуальний заказ</div>
 
       <div class="custom-grid" style="grid-template-columns:1fr 1fr">
       
@@ -3396,25 +3380,17 @@ function customOrderBox(accountRate, playerokRate) {
     oninput="updateCustomOrder('buy', this.value)">
 </div>
 
-      <div class="custom-result">
+            <div class="custom-result" style="grid-template-columns:1fr 1fr">
         <div>
-          <span>Закуп</span>
-          <b id="custom-buy">${fmtRub(buyRub)}</b>
+          <span>Закуп $</span>
+          <b>${fmtUsd(buyUsd)}</b>
         </div>
+
         <div>
-          <span>Комісія</span>
-          <b class="bad" id="custom-commission">${fmtRub(commission)}</b>
-        </div>
-        <div>
-          <span>Чистий прибуток</span>
-          <b class="good" id="custom-profit">${fmtRub(profitRub)}</b>
-        </div>
-        <div>
-          <span>В $</span>
-          <b class="yellow" id="custom-usd">${fmtUsd(profitUsd)}</b>
+          <span>Прибуток $</span>
+          <b class="yellow">${fmtUsd(profitUsd)}</b>
         </div>
       </div>
-    </div>
   `;
 }    
 
