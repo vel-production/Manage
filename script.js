@@ -1779,13 +1779,14 @@ function cdkForm(c) {
     const raw = document.getElementById('f-bulk-codes').value;
 
     const codes = raw
-  .match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/g)
-  ?.map(x => x.trim().toUpperCase()) || [];
+  .split(/\r?\n/)
+  .map(x => x.trim())
+  .filter(Boolean);
 
 if (!codes.length) {
   await showConfirm(
     'CDK не знайдено',
-    'Встав коди формату <b>67c72481-378f-49ae-a6b1-9cbb9236e280</b>'
+    'Встав один або багато кодів. Кожен CDK з нового рядка.'
   );
   return;
 }
