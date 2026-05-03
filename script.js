@@ -1,5 +1,5 @@
 const SHEET_ID = '1-yF9f9LepfGBpg1fyhewTcgT7oePscPEScD9v-8Ggn4';
-    const API_URL = 'https://script.google.com/macros/s/AKfycbxETbCEu7WQLtJlY8q6hQr3ulHgTvaDt_CzEU6Xb-cH7LeomJgmdFRlXf5W-tm8w6PWLA/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbz0X0mVJrnPbpe1AbljY60OuQ1DTZ1NpL968NUabwZVtwm3ArjOZN3gw3IpBrppKDpDdA/exec';
     const POLL_MS = 0;
 
     const CATEGORIES = ['Spotify', 'Claude', 'ChatGPT', 'Grok'];
