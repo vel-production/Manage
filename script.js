@@ -1,5 +1,5 @@
 const SHEET_ID = '1-yF9f9LepfGBpg1fyhewTcgT7oePscPEScD9v-8Ggn4';
-    const API_URL = 'https://script.google.com/macros/s/AKfycbxLqs9vFr9FCUt17iycoJv4rvxmkAL_mOyVH10rpprYvooUINCNepVyTTjtmZZIwHpyNg/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzTXiLht_UVobF-au4Hvcuy1koIZR0hUPT3W6F7T-trGzKp9X4HoymgKMt6iuqydTTtHA/exec';
     const POLL_MS = 0;
 
     const CATEGORIES = ['Spotify', 'Claude', 'ChatGPT', 'Grok'];
@@ -9,7 +9,10 @@ const SHEET_ID = '1-yF9f9LepfGBpg1fyhewTcgT7oePscPEScD9v-8Ggn4';
     const csvStats = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Stats`;
     const csvProfit = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=ProfitProducts`;
     const csvSales = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=PlayerokOrders`;
+    const csvMoneyFlow = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=MoneyFlow`;
 
+    let moneyRows = [];
+    let botWorker = "Admin";
     let salesRows = [];
     let isAdmin = false;
     let accounts = [];
@@ -173,7 +176,7 @@ async function enterAsWorker() {
 
   document.getElementById('btn-add').style.display = isAdmin ? 'flex' : 'none';
 
-  loadData();
+  loadBotWorker().then(loadData);
 
   clearInterval(pollTimer);
 }
@@ -240,13 +243,14 @@ async function enterAsWorker() {
 
 async function loadData() {
   try {
-    const [accRaw, cdkRaw, statsRaw, profitRaw, salesRaw] = await Promise.all([
-        loadCSV(csvAcc),
-        loadCSV(csvCdk),
-        loadCSV(csvStats),
-        loadCSV(csvProfit),
-        loadCSV(csvSales)
-    ]);
+    const [accRaw, cdkRaw, statsRaw, profitRaw, salesRaw, moneyRaw] = await Promise.all([
+  loadCSV(csvAcc),
+  loadCSV(csvCdk),
+  loadCSV(csvStats),
+  loadCSV(csvProfit),
+  loadCSV(csvSales),
+  loadCSV(csvMoneyFlow)
+]);
 
     accounts = accRaw.map((a, i) => ({ ...a, _id: i }));
 
@@ -262,6 +266,7 @@ async function loadData() {
 
     statsRows = statsRaw;
     salesRows = salesRaw;
+    moneyRows = moneyRaw;
 
     profitRows = profitRaw.map((r, i) => {
   const vals = Object.values(r);
@@ -700,6 +705,108 @@ function showCustomOrderBtn() {
   return !g.includes('apps') && !g.includes('app') && !g.includes('roblox');
 }    
 
+function getTodayMoney() {
+  const today = todayLocal();
+
+  return moneyRows.find(r => normalizeDate(r.date) === today) || {};
+}
+
+function getMonthMoney() {
+  const now = new Date();
+
+  return moneyRows.filter(r => {
+    const d = normalizeDate(r.date);
+    if (!d) return false;
+
+    const rd = new Date(d + "T00:00:00");
+
+    return rd.getFullYear() === now.getFullYear() &&
+           rd.getMonth() === now.getMonth();
+  });
+}
+
+function sumMoney(field, rows) {
+  return rows.reduce((s, r) => s + num(r[field]), 0);
+}
+
+function renderWorkerPanel() {
+  if (!isAdmin) {
+    const today = getTodayMoney();
+    const month = getMonthMoney();
+
+    return `
+      <div class="profit-dashboard">
+        <div class="profit-stat">
+          <span>Мій прибуток сьогодні</span>
+          <b>${fmtUsd(num(today.worker_usd))}</b>
+        </div>
+
+        <div class="profit-stat">
+          <span>Мій прибуток за місяць</span>
+          <b>${fmtUsd(sumMoney('worker_usd', month))}</b>
+        </div>
+      </div>
+    `;
+  }
+
+  const today = getTodayMoney();
+  const month = getMonthMoney();
+
+  return `
+    <div class="profit-dashboard">
+      <div class="profit-stat">
+        <span>Зараз працює</span>
+        <b>${esc(botWorker)}</b>
+      </div>
+
+      <div class="profit-stat profit-custom" onclick="setBotWorker('Admin')">
+        <span>Поставити</span>
+        <b>Admin</b>
+      </div>
+
+      <div class="profit-stat profit-custom" onclick="setBotWorker('Ваньок')">
+        <span>Поставити</span>
+        <b>Ваньок</b>
+      </div>
+
+      <div class="profit-stat">
+        <span>Брудний сьогодні</span>
+        <b>${fmtUsd(num(today.gross_usd))}</b>
+      </div>
+
+      <div class="profit-stat">
+        <span>Витрати сьогодні</span>
+        <b>${fmtUsd(num(today.boost_usd))}</b>
+      </div>
+
+      <div class="profit-stat">
+        <span>Чистий сьогодні</span>
+        <b>${fmtUsd(num(today.net_usd))}</b>
+      </div>
+
+      <div class="profit-stat">
+        <span>Твоє сьогодні</span>
+        <b>${fmtUsd(num(today.owner_usd))}</b>
+      </div>
+
+      <div class="profit-stat">
+        <span>Працівникам сьогодні</span>
+        <b>${fmtUsd(num(today.worker_usd))}</b>
+      </div>
+
+      <div class="profit-stat">
+        <span>Чистий за місяць</span>
+        <b>${fmtUsd(sumMoney('net_usd', month))}</b>
+      </div>
+
+      <div class="profit-stat">
+        <span>Працівникам за місяць</span>
+        <b>${fmtUsd(sumMoney('worker_usd', month))}</b>
+      </div>
+    </div>
+  `;
+}
+
 function renderProfit() {
   const el = document.getElementById('cards');
   const q = document.getElementById('search').value.toLowerCase();
@@ -719,6 +826,8 @@ function renderProfit() {
   const unmatchedToday = getUnmatchedSales('day').length;
 
   el.innerHTML = `
+      ${renderWorkerPanel()}
+      
     <div class="profit-dashboard">
       <div class="profit-stat">
         <span>Прибуток сьогодні</span>
@@ -1916,3 +2025,33 @@ const eyeOffIcon = `
     startApp();
   }
 });
+async function loadBotWorker() {
+  const cb = "bot_worker_cb_" + Date.now();
+
+  return new Promise(resolve => {
+    const script = document.createElement("script");
+
+    window[cb] = data => {
+      delete window[cb];
+      script.remove();
+      botWorker = data.worker || "Admin";
+      resolve(botWorker);
+    };
+
+    script.src = API_URL + "?action=bot_config&callback=" + cb;
+    document.body.appendChild(script);
+  });
+}
+
+async function setBotWorker(worker) {
+  botWorker = worker;
+
+  await postApi({
+    type: "bot_worker",
+    action: "set",
+    worker
+  });
+
+  toast("Зараз працює: " + worker, "ok");
+  setTimeout(loadData, 700);
+}
