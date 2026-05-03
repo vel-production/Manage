@@ -8,7 +8,7 @@ const SHEET_ID = '1-yF9f9LepfGBpg1fyhewTcgT7oePscPEScD9v-8Ggn4';
     const csvCdk = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=CDK`;
     const csvStats = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Stats`;
     const csvProfit = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=ProfitProducts`;
-    const csvSales = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=SalesLog`;
+    const csvSales = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=PlayerokOrders`;
 
     let salesRows = [];
     let isAdmin = false;
@@ -594,21 +594,15 @@ function fmtUsd(v) {
   return '$' + v.toFixed(2).replace('.', ',');
 }
 
-function getSalesRowsRaw(period = 'day') {
-  const now = new Date();
-  const today = todayLocal();
+function getSalesRows(period = 'day') {
+  return getSalesRowsRaw(period).filter(r => {
+    const status = String(r.status || '').toUpperCase();
+    const matched = String(r.matched || '').toUpperCase();
+    const profit = num(r.profit_usd);
 
-  return salesRows.filter(r => {
-    const d = normalizeDate(r.date);
-    if (!d) return false;
-
-    if (period === 'day') return d === today;
-
-    if (period === 'month') {
-      const rd = new Date(d + 'T00:00:00');
-      return rd.getFullYear() === now.getFullYear() &&
-             rd.getMonth() === now.getMonth();
-    }
+    if (status !== 'SENT' && status !== 'CONFIRMED') return false;
+    if (matched === 'NO') return false;
+    if (!profit) return false;
 
     return true;
   });
