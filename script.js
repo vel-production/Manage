@@ -1,5 +1,5 @@
 const SHEET_ID = '1-yF9f9LepfGBpg1fyhewTcgT7oePscPEScD9v-8Ggn4';
-    const API_URL = 'https://script.google.com/macros/s/AKfycbzHDAlyrHu9OpTho8YUXWU7rqAkeX_mCB3AeMQIy5SuE2zGSxCPhGFGi5JLCrjUmtRlYw/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwfo0NBfsi5noB__jfCpNJnPs8pHSSz4Zl-at6EbME6EUb4YsjdJ7lZ810gZvy645TVvQ/exec';
     const POLL_MS = 0;
 
     const CATEGORIES = ['Spotify', 'Claude', 'ChatGPT', 'Grok'];
@@ -1165,6 +1165,13 @@ function saveRateModal(type) {
   playerokRate = value;
   localStorage.setItem('playerokRate', value);
 }
+
+postApi({
+  type: 'rate',
+  action: 'set',
+  account_rate: getCurrentAccountRate(),
+  playerok_rate: getPlayerokRate()
+});    
 
   closeModal();
   render();
