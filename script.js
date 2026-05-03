@@ -594,6 +594,26 @@ function fmtUsd(v) {
   return '$' + v.toFixed(2).replace('.', ',');
 }
 
+function getSalesRowsRaw(period = 'day') {
+  const now = new Date();
+  const today = todayLocal();
+
+  return salesRows.filter(r => {
+    const d = normalizeDate(r.date);
+    if (!d) return false;
+
+    if (period === 'day') return d === today;
+
+    if (period === 'month') {
+      const rd = new Date(d + 'T00:00:00');
+      return rd.getFullYear() === now.getFullYear() &&
+             rd.getMonth() === now.getMonth();
+    }
+
+    return true;
+  });
+}
+
 function getSalesRows(period = 'day') {
   return getSalesRowsRaw(period).filter(r => {
     const status = String(r.status || '').toUpperCase();
@@ -633,12 +653,6 @@ function openUnmatchedSales() {
     : `<div class="empty">Всі продажі сьогодні знайдені ✅</div>`;
 
   document.getElementById('modal').style.display = 'flex';
-}
-
-function getSalesRows(period = 'day') {
-  return getSalesRowsRaw(period).filter(r => {
-    return String(r.matched || '').toUpperCase() !== 'NO' && num(r.profit_usd) !== 0;
-  });
 }
 
 function getSalesSum(field = 'profit_usd', period = 'day') {
