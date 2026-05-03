@@ -1,5 +1,5 @@
 const SHEET_ID = '1-yF9f9LepfGBpg1fyhewTcgT7oePscPEScD9v-8Ggn4';
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwOq9rBlp-gk3BHG_Xd33lTed_38Vf1d1GkW5jlLUlpG9SJjE4ehPONrmu-DvNpp9qwLw/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxBdx8NYbr4dO0XdQgmmSCLW1CyEvmsplpox3wz7-6zqDnh2H0w3BTS2Masj3qsMimNYg/exec';
     const POLL_MS = 0;
 
     const CATEGORIES = ['Spotify', 'Claude', 'ChatGPT', 'Grok'];
@@ -1169,7 +1169,8 @@ function saveRateModal(type) {
 postApi({
   type: 'rate',
   action: 'set',
-  account_rate: getCurrentAccountRate(),
+  roblox_rate: accountRates.Roblox,
+  account_rate: accountRates.default,
   playerok_rate: getPlayerokRate()
 });    
 
