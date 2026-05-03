@@ -599,7 +599,7 @@ function getSalesRowsRaw(period = 'day') {
   const today = todayLocal();
 
   return salesRows.filter(r => {
-    const d = normalizeDate(r.date);
+    const d = normalizeDate(r.profit_date);
     if (!d) return false;
 
     if (period === 'day') return d === today;
@@ -645,7 +645,7 @@ function openUnmatchedSales() {
         ${list.map(r => `
           <div class="field-note">
             <b>${esc(r.title || 'Без назви')}</b><br>
-            <span>${esc(r.date || '')}</span>
+            <span>${esc(r.profit_date || r.date || '')}</span>
           </div>
         `).join('')}
       </div>
